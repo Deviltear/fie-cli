@@ -1,0 +1,25 @@
+{
+  "name": "@fie-cli/nlog",
+  "version": "1.0.0",
+  "description": "基于npmlog封装的统一命令行打印",
+  "author": "xiaowei zhou <19337129021@163.com>",
+  "homepage": "",
+  "license": "ISC",
+  "main": "lib/index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "dependencies": {
+    "npmlog": "^6.0.2"
+  }
+}

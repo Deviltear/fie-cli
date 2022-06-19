@@ -5,7 +5,9 @@
   "author": "xiaowei zhou <19337129021@163.com>",
   "homepage": "",
   "license": "ISC",
-  "main": "bin/index.js",
+  "bin": {
+    "fie": "bin/index.js"
+  },
   "directories": {
     "main": "bin",
     "test": "__tests__"
@@ -17,6 +19,12 @@
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "dependencies": {
-    "import-local": "^3.1.0"
+    "@fie-cli/nlog": "file:../../utils/nlog",
+    "colors": "^1.4.0",
+    "import-local": "^3.1.0",
+    "path-exists": "^5.0.0",
+    "root-check": "^2.0.0",
+    "semver": "^7.3.7",
+    "user-home": "^3.0.0"
   }
 }
