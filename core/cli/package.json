@@ -22,9 +22,10 @@
     "@fie-cli/nlog": "file:../../utils/nlog",
     "colors": "^1.4.0",
     "import-local": "^3.1.0",
-    "path-exists": "^5.0.0",
-    "root-check": "^2.0.0",
+    "root-check": "^1.0.0",
     "semver": "^7.3.7",
-    "user-home": "^3.0.0"
+    "user-home": "^3.0.0",
+    "minimist": "^1.2.5",
+    "dotenv": "^8.2.0"
   }
 }
