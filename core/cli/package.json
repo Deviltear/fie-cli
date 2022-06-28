@@ -19,13 +19,16 @@
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "dependencies": {
+    "@fie-cli/get-npm-info": "file:../../utils/get-npm-info",
     "@fie-cli/nlog": "file:../../utils/nlog",
+    "@fie-cli/init": "file:../../commands/init",
     "colors": "^1.4.0",
+    "commander": "^9.3.0",
+    "dotenv": "^8.2.0",
     "import-local": "^3.1.0",
+    "minimist": "^1.2.5",
     "root-check": "^1.0.0",
     "semver": "^7.3.7",
-    "user-home": "^3.0.0",
-    "minimist": "^1.2.5",
-    "dotenv": "^8.2.0"
+    "user-home": "^3.0.0"
   }
 }

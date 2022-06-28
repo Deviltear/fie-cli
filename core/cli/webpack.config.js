@@ -13,19 +13,25 @@ module: {
   rules: [
     {
       test: /\.(js|jsx)$/,
-      use: ['happypack/loader?id=babel'],
       exclude: /node_modules/, // 不需要去转译"node\_modules"这里面的文件。
-    },
-
-
-    {
-      test: /\.(gif|png|jpe?g|webp)$/,
-      // Any image below or equal to 10K will be converted to inline base64 instead
-      type: 'asset/resource',
-      generator: {
-        filename: isDev ? '[name][ext]' : '[name].[hash:6][ext]',
+      use:{
+        loader:'babel-loader',
+        options:{
+          presets:["@babel/preset-env"],
+          plugins:[
+            ['@babel/plugin-transform-runtime',
+            {
+              corejs:3,
+              regenerator:true,
+              useESModules:true
+            }]
+          ]
+        }
       },
+
     },
+
+
   ],
 },
 
