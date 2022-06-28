@@ -22,6 +22,6 @@
   "dependencies": {
     "axios": "^0.27.2",
     "semver": "^7.3.7",
-    "url-join": "^4.0.0"
+    "url-join": "^3.0.0"
   }
 }
