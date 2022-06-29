@@ -11,6 +11,7 @@ const pkg = require('../package.json')
 const nlog = require("@fie-cli/nlog")
 const { getNpmLatestSemverVersion } = require("@fie-cli/get-npm-info")
 const { init } = require("@fie-cli/init")
+const { exec } = require("@fie-cli/exec")
 
 
 const { LOWEST_NODE_VERSION, DEFAULT_CLI_HOME, NPM_NAME } = require("./constant")
@@ -51,7 +52,7 @@ function registerCommander() {
   program
     .command('init [projectName]')
     .option('-f --force', '是否强制初始化项目')
-    .action(init)
+    .action(exec)
   const options = program.opts()
 
   //对debug命令进行监听
@@ -106,7 +107,7 @@ function createCliConfig() {
   } else {
     cliConfig['cliHome'] = path.join(userHome, DEFAULT_CLI_HOME);
   }
-  process.env.CLI_HOME_PATH = cliConfig.cliHome
+  process.env._CLI_HOME_PATH = cliConfig.cliHome
   return cliConfig;
 }
 function checkEnv() {
