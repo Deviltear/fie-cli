@@ -1,7 +1,7 @@
 {
-  "name": "@fie-cli/exec",
+  "name": "@fie-cli/package",
   "version": "1.0.0",
-  "description": " fie-cli/exec",
+  "description": "@fie-cli/package npm块通用类package",
   "author": "xiaowei zhou <19337129021@163.com>",
   "homepage": "https://github.com/Deviltear/fie-cli#readme",
   "license": "ISC",
@@ -27,7 +27,6 @@
     "url": "https://github.com/Deviltear/fie-cli/issues"
   },
   "dependencies": {
-    "@fie-cli/package": "file:../../models/package",
-    "@fie-cli/nlog": "file:../../utils/nlog"
+    "@fie-cli/util": "file:../../utils/util"
   }
 }

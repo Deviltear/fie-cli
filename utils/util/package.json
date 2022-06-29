@@ -1,11 +1,11 @@
 {
-  "name": "@fie-cli/utils",
+  "name": "@fie-cli/util",
   "version": "1.0.0",
-  "description": "fie-cli/utils",
+  "description": "fie-cli/util 公用的一些工具方法",
   "author": "xiaowei zhou <19337129021@163.com>",
   "homepage": "",
   "license": "ISC",
-  "main": "lib/utils.js",
+  "main": "lib/index.js",
   "directories": {
     "lib": "lib",
     "test": "__tests__"
