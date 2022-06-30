@@ -1,7 +1,7 @@
 {
-  "name": "@fie-cli/package",
+  "name": "@fie-cli/system-path-format",
   "version": "1.0.0",
-  "description": "@fie-cli/package npm块通用类package",
+  "description": "@fie-cli/system-path-format win 和 macos不同系统下对路径的兼容处理",
   "author": "xiaowei zhou <19337129021@163.com>",
   "homepage": "https://github.com/Deviltear/fie-cli#readme",
   "license": "ISC",
@@ -25,10 +25,5 @@
   },
   "bugs": {
     "url": "https://github.com/Deviltear/fie-cli/issues"
-  },
-  "dependencies": {
-    "@fie-cli/util": "file:../../utils/util",
-    "@fie-cli/system-path-format": "file:../../utils/system-path-format",
-    "pkg-dir": "^6.0.1"
   }
 }
