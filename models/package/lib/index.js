@@ -1,6 +1,7 @@
 'use strict';
 const path = require('path')
-const {isObject} = require('@fie-cli/util')
+const npmInstall =require('npminstall')
+const {isObject,getDefaultregistry} = require('@fie-cli/util')
 const systemPathFormat = require('@fie-cli/system-path-format')
 
 const pkgDir=require('pkg-dir').packageDirectorySync
@@ -14,7 +15,7 @@ class Package {
         }
         //package的路径
         this.targetPath = opt.targetPath
-
+        this.storeDir=opt.storePath,
         //package的名称
         this.packageName = opt.name
         //package的版本
@@ -23,7 +24,16 @@ class Package {
     //判断package是否存在
     exists() { }
     //安装package
-    install() { }
+    install() {
+        npmInstall({
+            root:this.targetPath,
+            storeDir:this.storeDir,
+            registry:getDefaultregistry(),
+            pkgs:[
+                {name:this.packageName,version:this.packageVersion}
+            ]
+        })
+     }
     //更新package
     update() { }
     //获取入口文件路径

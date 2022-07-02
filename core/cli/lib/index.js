@@ -21,6 +21,9 @@ async function core() {
     await prepare()
     registerCommander()
   } catch (e) {
+    if (process.env.LOG_LEVEL==='verbose') {
+      console.log(e)
+    }
     nlog.error(e.message)
   }
 }

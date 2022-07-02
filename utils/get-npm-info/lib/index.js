@@ -3,6 +3,7 @@
 const axios = require('axios')
 const urlJoin = require('url-join')
 const semver = require('semver')
+const {getDefaultregistry} = require('@fie-cli/util')
 function getNpmInfo(npmName, registry) {
     if (!npmName) {
         return null
@@ -18,9 +19,7 @@ function getNpmInfo(npmName, registry) {
     }).catch(err => Promise.reject(err)
     )
 }
-function getDefaultregistry(isOriginal = false) {
-    return isOriginal ? 'https://registry.npmjs.org' : 'https://registry.npm.taobao.org'
-}
+
 async function getNpmVersion(npmName, registry) {
     const data =await getNpmInfo(npmName, registry)
     if (data) {

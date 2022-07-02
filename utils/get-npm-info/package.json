@@ -20,6 +20,7 @@
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "dependencies": {
+    "@fie-cli/util": "file:../util",
     "axios": "^0.27.2",
     "semver": "^7.3.7",
     "url-join": "^3.0.0"
