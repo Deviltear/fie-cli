@@ -6,7 +6,7 @@ const SETTINGS = {
     init: '@fie-cli/init'
 }
 const CACHE_DIRECTORY = 'dependencies'
-function exec() {
+async function exec() {
     // process.env._CLI_TARGET_PATH,process.env._CLI_HOME_PATH 是core/cli 里面定义的全局环境变量
     let targetPath = process.env._CLI_TARGET_PATH
     const homePath = process.env._CLI_HOME_PATH
@@ -15,13 +15,7 @@ function exec() {
     const packageName = SETTINGS[cmdObj.name()]
     let storePath = ''
     const packageVersion = 'latest'
-    let pkg = new Package(
-        {
-            targetPath,
-            packageName,
-            packageVersion
-        }
-    )
+    let pkg = ''
     if (!targetPath) {
         targetPath = path.resolve(homePath, CACHE_DIRECTORY)
         //生成package的缓存路径
@@ -34,18 +28,31 @@ function exec() {
                 packageVersion
             }
         )
-        if (pkg.exists()) {
+        if (await pkg.exists()) {
+
             //更新package
-            pkg.update()
+          await  pkg.update()
         } else {
             //安装package
-            pkg.install()
+            await pkg.install()
         }
-
+    } else {
+        pkg = new Package(
+            {
+                targetPath,
+                packageName,
+                packageVersion
+            }
+        )
     }
-    const rootFile =pkg.getEntryFilePath()
 
-    require(rootFile).apply(null,arguments)
+
+    const rootFile = pkg.getEntryFilePath()
+    console.log(rootFile);
+
+    if (rootFile) {
+        require(rootFile).apply(null, arguments)
+    }
 
 
 }

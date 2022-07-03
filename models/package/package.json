@@ -27,8 +27,10 @@
     "url": "https://github.com/Deviltear/fie-cli/issues"
   },
   "dependencies": {
+    "@fie-cli/get-npm-info": "file:../../utils/get-npm-info",
     "@fie-cli/system-path-format": "file:../../utils/system-path-format",
     "@fie-cli/util": "file:../../utils/util",
+    "fs-extra": "^10.1.0",
     "npminstall": "^6.4.0",
     "pkg-dir": "^4.2.0"
   }
