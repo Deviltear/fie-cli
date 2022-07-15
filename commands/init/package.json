@@ -18,5 +18,10 @@
   },
   "scripts": {
     "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "dependencies": {
+    "@fie-cli/command": "file:../../models/command",
+    "fs-extra": "^10.1.0",
+    "inquirer": "8.0.0"
   }
 }
