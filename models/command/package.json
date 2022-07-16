@@ -1,9 +1,9 @@
 {
-  "name": "@fie-cli/init",
+  "name": "@fie-cli/command",
   "version": "1.0.0",
-  "description": "@fie-cli init packge",
+  "description": "> TODO: description",
   "author": "xiaowei zhou <19337129021@163.com>",
-  "homepage": "",
+  "homepage": "https://github.com/Deviltear/fie-cli#readme",
   "license": "ISC",
   "main": "lib/index.js",
   "directories": {
@@ -16,12 +16,18 @@
   "publishConfig": {
     "access": "public"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Deviltear/fie-cli.git"
+  },
   "scripts": {
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
+  "bugs": {
+    "url": "https://github.com/Deviltear/fie-cli/issues"
+  },
   "dependencies": {
-    "@fie-cli/command": "file:../../models/command",
-    "fs-extra": "^10.1.0",
-    "inquirer": "8.0.0"
+    "semver": "^7.3.7",
+    "colors": "^1.4.0"
   }
 }
