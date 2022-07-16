@@ -55,7 +55,7 @@ function registerCommander() {
   program
     .command('init [projectName]')
     .option('-f --force', '是否强制初始化项目')
-    .action(exec)
+    .action(init)
   const options = program.opts()
 
   //对debug命令进行监听

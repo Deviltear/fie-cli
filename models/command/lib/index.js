@@ -8,9 +8,9 @@ class Command {
     if (!argv) {
       throw new Error("参数不能为空");
     }
-    if (!Array.isArray(argv) && !argv?.length) {
-      throw new Error("参数不为数组");
-    }
+    // if (!Array.isArray(argv) && !argv?.length) {
+    //   throw new Error("参数不为数组");
+    // }
     this._argv = argv;
     let runner = new Promise((resolve, reject) => {
       let chain = Promise.resolve();
@@ -31,7 +31,7 @@ class Command {
     });
   }
   initArgs() {
-    this._cmdArgs = this._argv[this._argv.length - 1];
+    this._cmd = this._argv[this._argv.length - 1];
     this._argv = this._argv.slice(0, this._argv.length - 1);
   }
   checkNodeVersion() {
