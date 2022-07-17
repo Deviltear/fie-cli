@@ -5,9 +5,10 @@ const inquirer = require("inquirer");
 const Command = require("@fie-cli/command");
 //当前进程的执行文件路径
 const localPath = process.cwd();
-
 const TYPE_PROJECT = "project";
 const TYPE_COMPONENT = "componet";
+const getProjectTemplate = require("./getProjectTemplate");
+
 class InitCommand extends Command {
   init() {
     this.projectName = this._argv[0] || "";
@@ -20,14 +21,20 @@ class InitCommand extends Command {
       if (projectRes) {
         //下载模板
         //安装模板
+        this.downLoadTemplet();
         console.log(projectRes);
       }
     } catch (error) {
       console.log(error);
     }
   }
-
+  downLoadTemplet() {}
   async prepare() {
+    const template = await getProjectTemplate();
+    if (!template) {
+      //判断模板是否存在,不存在直接可以退出
+      throw new Error("项目模板不存在");
+    }
     //1.检查当前项目是否为空
     if (!this.isCwdDirEmpty()) {
       let continueTag = false;
@@ -86,7 +93,7 @@ class InitCommand extends Command {
       },
     ]);
     if (initType === TYPE_PROJECT) {
-      const  project  = await inquirer.prompt([
+      const project = await inquirer.prompt([
         {
           type: "input",
           name: "projectName",
@@ -128,7 +135,7 @@ class InitCommand extends Command {
       ]);
       projectInfo = {
         initType,
-       ...project,
+        ...project,
       };
     } else {
     }
