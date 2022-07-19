@@ -53,11 +53,11 @@ function registerCommander() {
     .option('-d, --debug, 是否开启调试模式', false)
     .option('-tp, --targetPath <char>', '是否指定本地调试文件目录', '/')
   program
-    .command('init [projectName]')
+    .command('init [projectName...]')
     .option('-f --force', '是否强制初始化项目')
     .action(init)
+  program.parse(process.argv)
   const options = program.opts()
-
   //对debug命令进行监听
   program.on('option:debug', function () {
     if (options.debug) {
@@ -83,7 +83,6 @@ function registerCommander() {
     program.outputHelp()
     console.log();//打印一行空方便分隔查看
   }
-  program.parse(process.argv)
 }
 function checkCliVersion() {
   nlog.info(pkg.version);

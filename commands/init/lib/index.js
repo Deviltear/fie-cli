@@ -13,7 +13,6 @@ class InitCommand extends Command {
   init() {
     this.projectName = this._argv[0] || "";
     this.hasForce = this._cmd.force;
-    console.log(this._cmd, "ll");
   }
   async exec() {
     try {
