@@ -2,7 +2,10 @@
 const fs = require("fs");
 const fse = require("fs-extra");
 const inquirer = require("inquirer");
+const userHome = require("user-home");
 const Command = require("@fie-cli/command");
+const Package = require("@fie-cli/package");
+
 //当前进程的执行文件路径
 const localPath = process.cwd();
 const TYPE_PROJECT = "project";
@@ -16,21 +19,22 @@ class InitCommand extends Command {
   }
   async exec() {
     try {
-      const projectRes = await this.prepare();
-      if (projectRes) {
+      const { projectInfo, templateInfo } = await this.prepare();
+      if (templateInfo) {
         //下载模板
         //安装模板
-        this.downLoadTemplet();
-        console.log(projectRes);
+        this.downLoadTemplet(templateInfo);
       }
     } catch (error) {
       console.log(error);
     }
   }
-  downLoadTemplet() {}
+  downLoadTemplet(templateInfo = []) {
+    const templateName = templateInfo.find(item => item.npmName)
+  }
   async prepare() {
     const template = await getProjectTemplate();
-    if (!template) {
+    if (!template || !template?.length) {
       //判断模板是否存在,不存在直接可以退出
       throw new Error("项目模板不存在");
     }
@@ -67,7 +71,8 @@ class InitCommand extends Command {
         // fse.emptyDirSync(localPath); //fixme:这里的删除直接从硬盘里删除了,无法找回?待换成其他方式
       }
     }
-    return this.getProjectInfo();
+    const projectInfoRes = await this.getProjectInfo()
+    return { projectInfo: projectInfoRes, templateInfo: template };
   }
 
   isCwdDirEmpty() {
