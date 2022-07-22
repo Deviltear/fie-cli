@@ -5,9 +5,8 @@ const inquirer = require("inquirer");
 const userHome = require("user-home");
 const Command = require("@fie-cli/command");
 const Package = require("@fie-cli/package");
-const { spinnerStart, sleep } = require("@fie-cli/util");
+const { spinnerStart, sleep, cpSpawnAsync } = require("@fie-cli/util");
 const nlog = require("@fie-cli/nlog");
-
 //当前进程的执行文件路径
 const currentProcessPath = process.cwd();
 const TYPE_PROJECT = "project";
@@ -32,7 +31,6 @@ class InitCommand extends Command {
     }
   }
   async installCustomTemplate() {
-    console.log(this.templateInfo, 'ssd');
     let spinner = spinnerStart('正在安装模板...')
     await sleep()
     //拷贝模板代码至当前目录
@@ -48,8 +46,28 @@ class InitCommand extends Command {
     } finally {
       spinner.stop()
     }
-  }
 
+    const { installCommand, startCommand } = this.templateInfo;
+
+    try {
+      await this.commandPars(installCommand)
+    } catch (error) {
+      throw new Error('依赖安装失败')
+    }
+    this.commandPars(startCommand)
+  }
+  async commandPars(commandStr) {
+    if (commandStr) {
+      const splitCmdList = commandStr.split(" ")
+      const cmd = splitCmdList[0]
+      const args = splitCmdList.slice(1)
+      return await cpSpawnAsync(cmd, args, {
+        stdio: 'inherit',
+        cwd: process.cwd()
+      })
+    }
+
+  }
   async installNormalTemplate() {
     console.log(this.templateInfo, 'ssd');
   }
@@ -61,7 +79,9 @@ class InitCommand extends Command {
       name: "templateName",
       type: 'rawlist',
     }]);
-    const { npmName, packageVersion } = templateList.find(item => item?.name == templateName)
+    const choocedTemplateInfo = templateList.find(item => item?.name == templateName)
+    this.templateInfo = choocedTemplateInfo
+    const { npmName, packageVersion } = choocedTemplateInfo
     const targetPath = path.resolve(userHome, '.fie-cli', 'template')
     const storePath = path.resolve(userHome, '.fie-cli', 'template', 'node_modules')
     const templateNpm = new Package({
@@ -139,7 +159,7 @@ class InitCommand extends Command {
       }
     }
     const projectInfoRes = await this.getProjectInfo()
-    this.templateInfo = projectInfoRes
+    this.projectInfo = projectInfoRes
     await this.downLoadTemplate(template);
     await this.installTemplate()
   }
