@@ -16,16 +16,17 @@ class Package {
     if (!isObject(opt)) {
       throw new Error("Package 类的参数不为对象");
     }
+    const { targetPath, storePath, packageName, packageVersion } = opt
     //package的路径
-    (this.targetPath = opt.targetPath),
+    this.targetPath = targetPath,
       //文件的缓存路径
-      (this.storeDir = opt.storePath),
+      this.storeDir = storePath,
       //package的名称
-      (this.packageName = opt.packageName),
+      this.packageName = packageName,
       //package的版本
-      (this.packageVersion = opt.packageVersion),
+      this.packageVersion = packageVersion,
       //缓存目录前缀
-      (this.cacheFilePathPrefix = this.packageName.replace("/", "_"));
+      this.cacheFilePathPrefix = this.packageName.replace("/", "_");
   }
   async prepare() {
     if (this.storeDir && !fs.existsSync(this.storeDir)) {
@@ -54,7 +55,7 @@ class Package {
   async exists() {
     if (this.storeDir) {
       await this.prepare();
-      return fs.existsSync(this.cacheFilePath());
+      return fs.existsSync(this.cacheFilePath);
     } else {
       return fs.existsSync(this.targetPath);
     }
@@ -74,8 +75,9 @@ class Package {
     const latestPackageVersion = await getNpmLatestVersion(this.packageName);
     const latestVersionCacheFilePath =
       this.getSpecifyCacheFilePath(latestPackageVersion);
-
+    fse.mkdirpSync(latestVersionCacheFilePath) //生成存放最新版本的文件夹
     if (fs.existsSync(latestVersionCacheFilePath)) {
+      fse.remove(this.cacheFilePath) //清除已有的旧版本包
       await npmInstall({
         root: this.targetPath,
         storeDir: this.storeDir,

@@ -21,7 +21,12 @@
   },
   "dependencies": {
     "@fie-cli/command": "file:../../models/command",
+    "@fie-cli/request": "file:../../utils/request",
+    "@fie-cli/package": "file:../../models/package",
+    "@fie-cli/util": "file:../../utils/util",
+    "@fie-cli/nlog": "file:../../utils/nlog",
     "fs-extra": "^10.1.0",
-    "inquirer": "8.0.0"
+    "inquirer": "8.0.0",
+    "user-home": "^3.0.0"
   }
 }
