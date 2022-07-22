@@ -9,7 +9,7 @@ const { spinnerStart, sleep } = require("@fie-cli/util");
 const nlog = require("@fie-cli/nlog");
 
 //当前进程的执行文件路径
-const localPath = process.cwd();
+const currentProcessPath = process.cwd();
 const TYPE_PROJECT = "project";
 const TYPE_COMPONENT = "componet";
 const getProjectTemplate = require("./getProjectTemplate");
@@ -26,6 +26,34 @@ class InitCommand extends Command {
       console.log(error);
     }
   }
+  async installTemplate() {
+    if (1) {
+      this.installCustomTemplate()
+    }
+  }
+  async installCustomTemplate() {
+    console.log(this.templateInfo, 'ssd');
+    let spinner = spinnerStart('正在安装模板...')
+    await sleep()
+    //拷贝模板代码至当前目录
+    try {
+      const cacheTemplatePath = path.resolve(this.templateNpm.cacheFilePath, 'template')
+      fse.ensureDirSync(cacheTemplatePath)
+      fse.ensureDirSync(currentProcessPath)
+
+      fse.copySync(cacheTemplatePath, currentProcessPath)
+      spinner.succeed('安装模板完成')
+    } catch (error) {
+      spinner.fail(error)
+    } finally {
+      spinner.stop()
+    }
+  }
+
+  async installNormalTemplate() {
+    console.log(this.templateInfo, 'ssd');
+  }
+
   async downLoadTemplate(templateList = []) {
     const { templateName } = await inquirer.prompt([{
       choices: createTemplateChoice(templateList),
@@ -42,6 +70,7 @@ class InitCommand extends Command {
       packageName: npmName,
       packageVersion
     })
+    this.templateNpm = templateNpm
     if (!await templateNpm.exists()) {
       const spinner = spinnerStart('正在下载模板...')
       await sleep()
@@ -55,7 +84,7 @@ class InitCommand extends Command {
       }
 
     } else {
-      const spinner = spinnerStart('正在更新模板...')     
+      const spinner = spinnerStart('正在更新模板...')
       await sleep()
       try {
         await templateNpm.update()
@@ -66,17 +95,8 @@ class InitCommand extends Command {
         spinner.stop()
       }
     }
+  }
 
-  }
-  async installTemplate (){
-
-  }
-  async installCustomTemplate() {
-    console.log(this.templateInfo, 'ssd');
-  }
-  async installNormalTemplate() {
-    console.log(this.templateInfo, 'ssd');
-  }
   async prepare() {
     const template = await getProjectTemplate();
     if (!template || !template?.length) {
@@ -84,14 +104,16 @@ class InitCommand extends Command {
       throw new Error("项目模板不存在");
     }
     //1.检查当前项目是否为空
-    if (!this.isCwdDirEmpty()) {
+    if (!isCwdDirEmpty()) {
       let continueTag = false;
       if (!this.force) {
+        const splitStringList = currentProcessPath.split('/')
+        const relativeProcessPath = splitStringList[splitStringList?.length - 1]
         const { isContinue } = await inquirer.prompt([
           {
             type: "confirm",
             name: "isContinue",
-            message: "当前进程文件夹不为空,是否继续创建项目",
+            message: `当前执行目录${relativeProcessPath}文件夹不为空,是否继续创建项目`,
             default: false,
           },
         ]);
@@ -113,22 +135,16 @@ class InitCommand extends Command {
         if (!confirmDel) {
           return;
         }
-        // fse.remove(localPath); //todo:目前是删除至回收站,开发阶段先屏蔽
+        fse.emptyDirSync(currentProcessPath); //fixme:目前是删除至回收站,是否有方式删除至回收站
       }
     }
     const projectInfoRes = await this.getProjectInfo()
     this.templateInfo = projectInfoRes
-    this.downLoadTemplate(template);
+    await this.downLoadTemplate(template);
     await this.installTemplate()
   }
 
-  isCwdDirEmpty() {
-    let fileList = fs.readdirSync(localPath);
-    fileList = fileList.filter(
-      (file) => !file.startsWith(".") && !["node_modules"].includes(file)
-    );
-    return !fileList || !fileList?.length;
-  }
+
   async getProjectInfo() {
     let projectInfo = {};
     const { initType } = await inquirer.prompt([
@@ -193,7 +209,13 @@ class InitCommand extends Command {
     return projectInfo;
   }
 }
-
+function isCwdDirEmpty() {
+  let fileList = fs.readdirSync(currentProcessPath);
+  fileList = fileList.filter(
+    (file) => !file.startsWith(".") && !["node_modules"].includes(file)
+  );
+  return !fileList || !fileList?.length;
+}
 function init(argv) {
   return new InitCommand(argv);
 }
