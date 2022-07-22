@@ -5,13 +5,15 @@ const inquirer = require("inquirer");
 const userHome = require("user-home");
 const Command = require("@fie-cli/command");
 const Package = require("@fie-cli/package");
+const { spinnerStart, sleep } = require("@fie-cli/util");
+const nlog = require("@fie-cli/nlog");
 
 //当前进程的执行文件路径
 const localPath = process.cwd();
 const TYPE_PROJECT = "project";
 const TYPE_COMPONENT = "componet";
 const getProjectTemplate = require("./getProjectTemplate");
-
+const path = require("path");
 class InitCommand extends Command {
   init() {
     this.projectName = this._argv[0] || "";
@@ -19,18 +21,61 @@ class InitCommand extends Command {
   }
   async exec() {
     try {
-      const { projectInfo, templateInfo } = await this.prepare();
-      if (templateInfo) {
-        //下载模板
-        //安装模板
-        this.downLoadTemplet(templateInfo);
-      }
+      await this.prepare();
     } catch (error) {
       console.log(error);
     }
   }
-  downLoadTemplet(templateInfo = []) {
-    const templateName = templateInfo.find(item => item.npmName)
+  async downLoadTemplate(templateList = []) {
+    const { templateName } = await inquirer.prompt([{
+      choices: createTemplateChoice(templateList),
+      message: '请选择项目模板',
+      name: "templateName",
+      type: 'rawlist',
+    }]);
+    const { npmName, packageVersion } = templateList.find(item => item?.name == templateName)
+    const targetPath = path.resolve(userHome, '.fie-cli', 'template')
+    const storePath = path.resolve(userHome, '.fie-cli', 'template', 'node_modules')
+    const templateNpm = new Package({
+      targetPath,
+      storePath,
+      packageName: npmName,
+      packageVersion
+    })
+    if (!await templateNpm.exists()) {
+      const spinner = spinnerStart('正在下载模板...')
+      await sleep()
+      try {
+        await templateNpm.install()
+        nlog.success('下载模板成功')
+
+      } catch (e) {
+      } finally {
+        spinner.stop()
+      }
+
+    } else {
+      const spinner = spinnerStart('正在更新模板...')     
+      await sleep()
+      try {
+        await templateNpm.update()
+        nlog.success('更新模板成功')
+
+      } catch (e) {
+      } finally {
+        spinner.stop()
+      }
+    }
+
+  }
+  async installTemplate (){
+
+  }
+  async installCustomTemplate() {
+    console.log(this.templateInfo, 'ssd');
+  }
+  async installNormalTemplate() {
+    console.log(this.templateInfo, 'ssd');
   }
   async prepare() {
     const template = await getProjectTemplate();
@@ -56,7 +101,7 @@ class InitCommand extends Command {
         }
       }
       if (continueTag || this.force) {
-        //强制更新,情况当前目录
+        //强制更新,清空当前目录
         const { confirmDel } = await inquirer.prompt([
           {
             type: "confirm",
@@ -68,11 +113,13 @@ class InitCommand extends Command {
         if (!confirmDel) {
           return;
         }
-        // fse.emptyDirSync(localPath); //fixme:这里的删除直接从硬盘里删除了,无法找回?待换成其他方式
+        // fse.remove(localPath); //todo:目前是删除至回收站,开发阶段先屏蔽
       }
     }
     const projectInfoRes = await this.getProjectInfo()
-    return { projectInfo: projectInfoRes, templateInfo: template };
+    this.templateInfo = projectInfoRes
+    this.downLoadTemplate(template);
+    await this.installTemplate()
   }
 
   isCwdDirEmpty() {
@@ -149,6 +196,12 @@ class InitCommand extends Command {
 
 function init(argv) {
   return new InitCommand(argv);
+}
+function createTemplateChoice(list) {
+  return list.map(item => ({
+    value: item.name,
+    name: item.name,
+  }));
 }
 module.exports = { init };
 module.exports.InitCommand = InitCommand;
