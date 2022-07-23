@@ -13,6 +13,7 @@ const TYPE_PROJECT = "project";
 const TYPE_COMPONENT = "componet";
 const getProjectTemplate = require("./getProjectTemplate");
 const path = require("path");
+const WHITE_COMMAND = ['npm', 'cnpm', 'yarn', 'pnpm']
 class InitCommand extends Command {
   init() {
     this.projectName = this._argv[0] || "";
@@ -52,14 +53,17 @@ class InitCommand extends Command {
     try {
       await this.commandPars(installCommand)
     } catch (error) {
-      throw new Error('依赖安装失败')
+      throw new Error('依赖安装失败,可手动进行安装')
     }
     this.commandPars(startCommand)
   }
   async commandPars(commandStr) {
     if (commandStr) {
       const splitCmdList = commandStr.split(" ")
-      const cmd = splitCmdList[0]
+      const cmd = this.checkWhiteCommand(splitCmdList[0])
+      if (!cmd) {
+        nlog.error(`命令 ${commandStr} 不是一个合法的安装依赖或启动命令`)
+      }
       const args = splitCmdList.slice(1)
       return await cpSpawnAsync(cmd, args, {
         stdio: 'inherit',
@@ -67,6 +71,11 @@ class InitCommand extends Command {
       })
     }
 
+  }
+  checkWhiteCommand(cmd) {
+    if (WHITE_COMMAND.includes(cmd)) {
+      return cmd
+    }
   }
   async installNormalTemplate() {
     console.log(this.templateInfo, 'ssd');
@@ -133,7 +142,7 @@ class InitCommand extends Command {
           {
             type: "confirm",
             name: "isContinue",
-            message: `当前执行目录${relativeProcessPath}文件夹不为空,是否继续创建项目`,
+            message: `当前执行目录 ${relativeProcessPath} 文件夹不为空,是否继续创建项目`,
             default: false,
           },
         ]);
@@ -155,7 +164,10 @@ class InitCommand extends Command {
         if (!confirmDel) {
           return;
         }
-        fse.emptyDirSync(currentProcessPath); //fixme:目前是删除至回收站,是否有方式删除至回收站
+        let spinner = spinnerStart('正在清空目录...')
+        await sleep(500)
+        await fse.emptyDir(currentProcessPath); //fixme:目前是删除至回收站,是否有方式删除至回收站
+        spinner.stop()
       }
     }
     const projectInfoRes = await this.getProjectInfo()
