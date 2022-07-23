@@ -13,6 +13,9 @@ const TYPE_PROJECT = "project";
 const TYPE_COMPONENT = "componet";
 const getProjectTemplate = require("./getProjectTemplate");
 const path = require("path");
+const ejs = require("ejs");
+const glob = require("glob");
+
 const WHITE_COMMAND = ['npm', 'cnpm', 'yarn', 'pnpm']
 class InitCommand extends Command {
   init() {
@@ -31,6 +34,35 @@ class InitCommand extends Command {
       this.installCustomTemplate()
     }
   }
+  async ejsRender(options) {
+    const dir = process.cwd()
+   const ejsdata =  this.projectInfo
+    return new Promise((resolve, reject) => {
+      const { ignore } = options || {}
+      glob('**', {
+        cwd: dir,
+        ignore,
+        nodir: true
+      }, (err, files) => {
+        if (err) {
+          reject(err)
+        }
+        Promise.all(files.map(file => {
+          const filePath = path.join(dir, file)
+          return new Promise((resolve1, reject1) => {
+            ejs.renderFile(filePath, ejsdata,{}, (err, result) => {
+              if (err) {
+                reject1(err)
+              } else {
+                fse.writeFileSync(filePath,result)
+                resolve1(result)
+              }
+            })
+          })
+        })).then(() => resolve()).catch(err => reject(err))
+      })
+    })
+  }
   async installCustomTemplate() {
     let spinner = spinnerStart('正在安装模板...')
     await sleep()
@@ -47,7 +79,10 @@ class InitCommand extends Command {
     } finally {
       spinner.stop()
     }
+    const ignore = ["node_modules/**", "public/**"]
 
+
+    await this.ejsRender({ ignore })
     const { installCommand, startCommand } = this.templateInfo;
 
     try {
@@ -55,7 +90,12 @@ class InitCommand extends Command {
     } catch (error) {
       throw new Error('依赖安装失败,可手动进行安装')
     }
-    this.commandPars(startCommand)
+    try {
+      await this.commandPars(startCommand)
+    } catch (error) {
+      throw new Error('项目启动失败,可检查后手动启动')
+    }
+    
   }
   async commandPars(commandStr) {
     if (commandStr) {
