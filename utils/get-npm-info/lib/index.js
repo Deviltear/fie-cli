@@ -30,7 +30,7 @@ async function getNpmVersion(npmName, registry) {
 }
 //根据version 获取符合semver 规范的最新版本号
 function getSemverVersions(baseVersion,versions=[]) {
-    return versions.filter(v=>semver.satisfies(v,`^${baseVersion}`)).sort((a,b)=> semver.gt(a,b))
+    return versions.filter(v=>semver.satisfies(v,`^${baseVersion}`)).sort((a,b)=> semver.gt(a,b)?-1:1)
 }
 // 根据指定 version 和包名获取符合 semver 规范的最新版本号
 function getNpmLatestSemverVersion(npm, baseVersion, registry) {

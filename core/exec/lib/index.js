@@ -14,35 +14,46 @@ async function exec() {
   nlog.verbose(targetPath, homePath);
   const cmdObj = arguments[arguments.length - 1];
   const packageName = SETTINGS[cmdObj.name()];
-  let storePath = "";
+  let storePath ,rootFile;
   const packageVersion = "latest";
-  let pkg = "";
   if (!targetPath) {
+
     targetPath = path.resolve(homePath, CACHE_DIRECTORY);
     //生成package的缓存路径
     storePath = path.resolve(targetPath, "node_modules");
-    pkg = new Package({
+
+  const  initPkg = new Package({
       targetPath,
       storePath,
       packageName,
       packageVersion,
     });
-    if (await pkg.exists()) {
+
+    if (await initPkg.exists()) {
       //更新package
-      await pkg.update();
+  console.log(initPkg,33);
+
+      await initPkg.update();
     } else {
       //安装package
-      await pkg.install();
+      await initPkg.install();
+  console.log(initPkg,33);
+
     }
+   rootFile = initPkg.getEntryFilePath();
+
   } else {
-    pkg = new Package({
+    console.log(333);
+   const execPkg = new Package({
       targetPath,
+      storePath,
       packageName,
       packageVersion,
     });
+   rootFile = execPkg.getEntryFilePath();
+
   }
 
-  const rootFile = pkg.getEntryFilePath();
   if (rootFile) {
     try {
       const args = Array.from(arguments);

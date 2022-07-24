@@ -11,7 +11,7 @@ const pkg = require('../package.json')
 const nlog = require("@fie-cli/nlog")
 const { getNpmLatestSemverVersion } = require("@fie-cli/get-npm-info")
 const { init } = require("@fie-cli/init")
-const { exec } = require("@fie-cli/exec")
+const { exec:execInit } = require("@fie-cli/exec")
 
 
 const { LOWEST_NODE_VERSION, DEFAULT_CLI_HOME, NPM_NAME } = require("./constant")
@@ -55,7 +55,7 @@ function registerCommander() {
   program
     .command('init [projectName...]')
     .option('-f --force', '是否强制初始化项目')
-    .action(init)
+    .action(execInit)
   program.parse(process.argv)
   const options = program.opts()
   //对debug命令进行监听
