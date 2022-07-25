@@ -20,7 +20,7 @@ const WHITE_COMMAND = ['npm', 'cnpm', 'yarn', 'pnpm']
 class InitCommand extends Command {
   init() {
     this.projectName = this._argv[0] || "";
-    this.hasForce = this._cmd.force;
+    this.hasForce = this._cmd?.force;
   }
   async exec() {
     try {
