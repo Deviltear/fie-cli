@@ -30,9 +30,7 @@ class InitCommand extends Command {
     }
   }
   async installTemplate() {
-    if (1) {
-      this.installCustomTemplate()
-    }
+      this.installNormalTemplate()
   }
   async ejsRender(options) {
     const dir = process.cwd()
@@ -63,7 +61,7 @@ class InitCommand extends Command {
       })
     })
   }
-  async installCustomTemplate() {
+  async installNormalTemplate() {
     let spinner = spinnerStart('正在安装模板...')
     await sleep()
     //拷贝模板代码至当前目录
@@ -117,8 +115,8 @@ class InitCommand extends Command {
       return cmd
     }
   }
-  async installNormalTemplate() {
-    console.log(this.templateInfo, 'ssd');
+  async installCustomTemplate() {
+   //todo:待开发自定义模板安装
   }
 
   async downLoadTemplate(templateList = []) {

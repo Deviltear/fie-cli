@@ -31,19 +31,16 @@ async function exec() {
 
     if (await initPkg.exists()) {
       //更新package
-  console.log(initPkg,33);
 
       await initPkg.update();
     } else {
       //安装package
       await initPkg.install();
-  console.log(initPkg,33);
 
     }
    rootFile = initPkg.getEntryFilePath();
 
   } else {
-    console.log(333);
    const execPkg = new Package({
       targetPath,
       storePath,
