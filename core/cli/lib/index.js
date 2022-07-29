@@ -6,13 +6,14 @@ const colors = require('colors') //改变字符串颜色
 const userHome = require('user-home');
 const fs = require('fs');
 const path = require('path');
-const { program } = require('commander');
+const { Command } = require('commander');
 const pkg = require('../package.json')
 const nlog = require("@fie-cli/nlog")
 const { getNpmLatestSemverVersion } = require("@fie-cli/get-npm-info")
 const { init } = require("@fie-cli/init")
-const { exec:execInit } = require("@fie-cli/exec")
-
+const { basicExec } = require("@fie-cli/exec")
+// const { init:publish } = require("@fie-cli/publish")
+const program = new Command();
 
 const { LOWEST_NODE_VERSION, DEFAULT_CLI_HOME, NPM_NAME } = require("./constant")
 let args, config;
@@ -56,7 +57,11 @@ function registerCommander() {
     .command('init [projectName...]')
     .option('-f --force', '是否强制初始化项目')
     .action(init)
-  program.parse(process.argv)
+  program
+    .command('publish')
+    .description('项目发布')
+    .option('--targetPath <char>', '手动指定publish包路径','')
+    .action(basicExec)    
   const options = program.opts()
   //对debug命令进行监听
   program.on('option:debug', function () {
@@ -79,6 +84,8 @@ function registerCommander() {
     }
     nlog.level = process.env.LOG_LEVEL;
   })
+  program.parse(process.argv)
+
   if (process.args && process.args.length < 3) {
     program.outputHelp()
     console.log();//打印一行空方便分隔查看
