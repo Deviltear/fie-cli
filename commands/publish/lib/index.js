@@ -1,10 +1,11 @@
 'use strict';
 const nlog = require("@fie-cli/nlog");
 const Command = require("@fie-cli/command");
+const Git = require("@fie-cli/git");
+
 const fse = require("fs-extra");
 const path = require('path')
 const fs = require('fs')
-
 
 class PulishCommand extends Command {
     init() {
@@ -15,6 +16,9 @@ class PulishCommand extends Command {
         try {
             const startTime = new Date().getTime()
             this.prepare()
+            const git =new Git(this.projectInfo)
+            await git.prepare()
+            git.init()
             const endTime = new Date().getTime()
             nlog.info(`本次发布耗时: ${Math.floor(endTime - startTime) / 1000} 秒`)
 
@@ -38,7 +42,7 @@ class PulishCommand extends Command {
         this.projectInfo = {
             name,
             version,
-            dir: projectPath
+            projectPath
         }
     }
 
