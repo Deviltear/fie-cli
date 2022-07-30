@@ -42,5 +42,16 @@ function readFile(path, options = {}) {
 
     }
 }
+function writeFile(path, data, { rewrite = true } = {}) {
+    if (fs.existsSync(path)) {
+        if (rewrite) {
+            fs.writeFileSync(path, data)
+            return true
+        }
 
-module.exports = { isObject, getDefaultregistry, spinnerStart, sleep, cpSpawnAsync, readFile };
+    } else {
+        fs.writeFileSync(path, data);
+        return true;
+    }
+}
+module.exports = { isObject, getDefaultregistry, spinnerStart, sleep, cpSpawnAsync, readFile, writeFile };

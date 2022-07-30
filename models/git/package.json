@@ -27,10 +27,13 @@
     "url": "https://github.com/Deviltear/fie-cli/issues"
   },
   "dependencies": {
-    "simple-git": "^3.10.0",
-    "user-home": "^3.0.0",
-    "fs-extra": "10.1.0",
+    "@fie-cli/nlog": "file:../../utils/nlog",
     "@fie-cli/util": "file:../../utils/util",
-    "inquirer": "8.0.0"
+    "fs-extra": "10.1.0",
+    "inquirer": "8.0.0",
+    "simple-git": "^3.10.0",
+    "terminal-link": "^2.1.1",
+    "user-home": "^3.0.0",
+    "axios": "^0.27.2"
   }
 }

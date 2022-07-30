@@ -60,7 +60,7 @@ function registerCommander() {
   program
     .command('publish')
     .description('项目发布')
-    .option('--targetPath <char>', '手动指定publish包路径','')
+    .option('--refreshServer', '强制更新远程Git仓库')
     .action(basicExec)    
   const options = program.opts()
   //对debug命令进行监听
