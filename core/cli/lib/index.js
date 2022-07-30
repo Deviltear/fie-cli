@@ -63,6 +63,7 @@ function registerCommander() {
     .description('项目发布')
     .option('--refreshServer', '强制更新远程Git仓库')
     .option('--refreshToken', '强制更新git token信息')
+    .option('--refreshOwner', '强制更新git owner信息')
     .action(basicExec)    
   const options = program.opts()
   //对debug命令进行监听

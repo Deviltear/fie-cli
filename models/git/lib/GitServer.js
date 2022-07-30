@@ -23,7 +23,7 @@ class GitServer {
   getUser() { //获取用户
     error("getUser")
   }
-  getOrg() { //获取组织
+  getOrgs() { //获取组织
     error("getOrg")
   }
 
@@ -35,6 +35,19 @@ class GitServer {
   };
   getSSHKeysHelpUrl() {
     error('getSSHKeysHelpUrl');
+  };
+
+  isHttpResponse(response) {
+    return response && response.status && response.statusText &&
+      response.headers && response.data && response.config;
+  };
+
+  handleResponse(response) {
+    if (this.isHttpResponse(response) && response !== 200) {
+      return null;
+    } else {
+      return response;
+    }
   };
 
 }

@@ -9,15 +9,17 @@ const fs = require('fs')
 
 class PulishCommand extends Command {
     init() {
-        console.log(this._argv);
-    
+        const { refreshServer, refreshToken,refreshOwner } = this._cmd || {}
+        this.otherOptoins = {
+            refreshServer, refreshToken,refreshOwner
+        }
     }
 
     async exec() {
         try {
             const startTime = new Date().getTime()
             this.prepare()
-            const git =new Git({...this.projectInfo,refreshServer:this._cmd?.refreshServer,refreshToken:this._cmd?.refreshToken})
+            const git = new Git({ ...this.projectInfo, ...this.otherOptoins })
             await git.prepare()
             git.init()
             const endTime = new Date().getTime()

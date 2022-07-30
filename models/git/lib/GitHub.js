@@ -6,7 +6,20 @@ class GitHub extends GitServer {
   constructor (){
     super('gitHub')
   } 
+  getUser  ()  {
+    return this.request.get('/user').then(response => {
+      return this.handleResponse(response);
+    });
+  };
 
+  getOrgs  ()  {
+    return this.request.get('/user/orgs', {
+      page: 1,
+      per_page: 100,
+    }).then(response => {
+      return this.handleResponse(response);
+    });
+  };
   setToken (token)  {
     this.request = new GithubRequest(token);
   };
