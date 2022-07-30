@@ -55,12 +55,14 @@ function registerCommander() {
     .option('-tp, --targetPath <char>', '是否指定本地调试文件目录', '/')
   program
     .command('init [projectName...]')
+    .description('项目初始化')
     .option('-f --force', '是否强制初始化项目')
     .action(init)
   program
     .command('publish')
     .description('项目发布')
     .option('--refreshServer', '强制更新远程Git仓库')
+    .option('--refreshToken', '强制更新git token信息')
     .action(basicExec)    
   const options = program.opts()
   //对debug命令进行监听

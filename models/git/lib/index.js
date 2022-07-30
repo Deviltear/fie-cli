@@ -18,12 +18,14 @@ const GIT_TOKEN_FILE = '.git_token'
 
 class Git {
     constructor(info) {
-        const { name, version, projectPath, refreshGit = false } = info || {}
+        const { name, version, projectPath, refreshGit = false,refreshToken=false } = info || {}
         this.name = name
         this.version = version
         this.projectPath = projectPath
         this.git = simpleGit(projectPath)
         this.refreshGit = refreshGit
+        this.refreshToken = refreshToken
+
 
     }
     async prepare() {
@@ -68,7 +70,7 @@ class Git {
     async checkGitToken() {
         const tokenPath = this.createPath(GIT_TOKEN_FILE)
         let token = readFile(tokenPath)
-        if (!token) {
+        if (!token||this.refreshToken) {
             nlog.warn(`${this.gitServer.type} token未生成,请先生成${this.gitServer.type}token, ${terminalLink('链接:', this.gitServer?.getTokenHelpUrl())}`)
             const { token } = await inquirer.prompt({
                 type: 'password',

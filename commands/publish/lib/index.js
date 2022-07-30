@@ -19,7 +19,7 @@ class PulishCommand extends Command {
         try {
             const startTime = new Date().getTime()
             this.prepare()
-            const git =new Git({...this.projectInfo,refreshServer:this._cmd?.refreshServer})
+            const git =new Git({...this.projectInfo,refreshServer:this._cmd?.refreshServer,refreshToken:true})
             await git.prepare()
             git.init()
             const endTime = new Date().getTime()
