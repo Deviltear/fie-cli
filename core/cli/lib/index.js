@@ -54,7 +54,7 @@ function registerCommander() {
     .option('-d, --debug, 是否开启调试模式', false)
     .option('-tp, --targetPath <char>', '是否指定本地调试文件目录', '/')
   program
-    .command('init [projectName...]')
+    .command('init [projectName]')
     .description('项目初始化')
     .option('-f --force', '是否强制初始化项目')
     .action(init)

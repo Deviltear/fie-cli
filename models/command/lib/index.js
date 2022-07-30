@@ -31,7 +31,8 @@ class Command {
     });
   }
   initArgs() {
-    this._cmd = this._argv[this._argv.length - 1];
+    this._cmd = this._argv[0];
+    console.log(this._argv,'ee');
     this._argv = this._argv.slice(0, this._argv.length - 1);
   }
   checkNodeVersion() {
