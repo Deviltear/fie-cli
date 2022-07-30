@@ -5,19 +5,22 @@ const inquirer = require("inquirer");
 const userHome = require("user-home");
 const Command = require("@fie-cli/command");
 const Package = require("@fie-cli/package");
-const { spinnerStart, sleep } = require("@fie-cli/util");
+const { spinnerStart, sleep, cpSpawnAsync } = require("@fie-cli/util");
 const nlog = require("@fie-cli/nlog");
-
 //当前进程的执行文件路径
-const localPath = process.cwd();
+const currentProcessPath = process.cwd();
 const TYPE_PROJECT = "project";
 const TYPE_COMPONENT = "componet";
 const getProjectTemplate = require("./getProjectTemplate");
 const path = require("path");
+const ejs = require("ejs");
+const glob = require("glob");
+
+const WHITE_COMMAND = ['npm', 'cnpm', 'yarn', 'pnpm']
 class InitCommand extends Command {
   init() {
     this.projectName = this._argv[0] || "";
-    this.hasForce = this._cmd.force;
+    this.force = this._cmd?.force;
   }
   async exec() {
     try {
@@ -26,6 +29,96 @@ class InitCommand extends Command {
       console.log(error);
     }
   }
+  async installTemplate() {
+      this.installNormalTemplate()
+  }
+  async ejsRender(options) {
+    const dir = process.cwd()
+   const ejsdata =  this.projectInfo
+    return new Promise((resolve, reject) => {
+      const { ignore } = options || {}
+      glob('**', {
+        cwd: dir,
+        ignore,
+        nodir: true
+      }, (err, files) => {
+        if (err) {
+          reject(err)
+        }
+        Promise.all(files.map(file => {
+          const filePath = path.join(dir, file)
+          return new Promise((resolve1, reject1) => {
+            ejs.renderFile(filePath, ejsdata,{}, (err, result) => {
+              if (err) {
+                reject1(err)
+              } else {
+                fse.writeFileSync(filePath,result)
+                resolve1(result)
+              }
+            })
+          })
+        })).then(() => resolve()).catch(err => reject(err))
+      })
+    })
+  }
+  async installNormalTemplate() {
+    let spinner = spinnerStart('正在安装模板...')
+    await sleep()
+    //拷贝模板代码至当前目录
+    try {
+      const cacheTemplatePath = path.resolve(this.templateNpm.cacheFilePath, 'template')
+      fse.ensureDirSync(cacheTemplatePath)
+      fse.ensureDirSync(currentProcessPath)
+
+      fse.copySync(cacheTemplatePath, currentProcessPath)
+      spinner.succeed('安装模板完成')
+    } catch (error) {
+      spinner.fail(error)
+    } finally {
+      spinner.stop()
+    }
+    const ignore = ["node_modules/**", "public/**"]
+
+
+    await this.ejsRender({ ignore })
+    const { installCommand, startCommand } = this.templateInfo;
+
+    try {
+      await this.commandPars(installCommand)
+    } catch (error) {
+      throw new Error('依赖安装失败,可手动进行安装')
+    }
+    try {
+      await this.commandPars(startCommand)
+    } catch (error) {
+      throw new Error('项目启动失败,可检查后手动启动')
+    }
+    
+  }
+  async commandPars(commandStr) {
+    if (commandStr) {
+      const splitCmdList = commandStr.split(" ")
+      const cmd = this.checkWhiteCommand(splitCmdList[0])
+      if (!cmd) {
+        nlog.error(`命令 ${commandStr} 不是一个合法的安装依赖或启动命令`)
+      }
+      const args = splitCmdList.slice(1)
+      return await cpSpawnAsync(cmd, args, {
+        stdio: 'inherit',
+        cwd: process.cwd()
+      })
+    }
+
+  }
+  checkWhiteCommand(cmd) {
+    if (WHITE_COMMAND.includes(cmd)) {
+      return cmd
+    }
+  }
+  async installCustomTemplate() {
+   //todo:待开发自定义模板安装
+  }
+
   async downLoadTemplate(templateList = []) {
     const { templateName } = await inquirer.prompt([{
       choices: createTemplateChoice(templateList),
@@ -33,7 +126,9 @@ class InitCommand extends Command {
       name: "templateName",
       type: 'rawlist',
     }]);
-    const { npmName, packageVersion } = templateList.find(item => item?.name == templateName)
+    const choocedTemplateInfo = templateList.find(item => item?.name == templateName)
+    this.templateInfo = choocedTemplateInfo
+    const { npmName, packageVersion } = choocedTemplateInfo
     const targetPath = path.resolve(userHome, '.fie-cli', 'template')
     const storePath = path.resolve(userHome, '.fie-cli', 'template', 'node_modules')
     const templateNpm = new Package({
@@ -42,6 +137,7 @@ class InitCommand extends Command {
       packageName: npmName,
       packageVersion
     })
+    this.templateNpm = templateNpm
     if (!await templateNpm.exists()) {
       const spinner = spinnerStart('正在下载模板...')
       await sleep()
@@ -55,7 +151,7 @@ class InitCommand extends Command {
       }
 
     } else {
-      const spinner = spinnerStart('正在更新模板...')     
+      const spinner = spinnerStart('正在更新模板...')
       await sleep()
       try {
         await templateNpm.update()
@@ -66,17 +162,8 @@ class InitCommand extends Command {
         spinner.stop()
       }
     }
+  }
 
-  }
-  async installTemplate (){
-
-  }
-  async installCustomTemplate() {
-    console.log(this.templateInfo, 'ssd');
-  }
-  async installNormalTemplate() {
-    console.log(this.templateInfo, 'ssd');
-  }
   async prepare() {
     const template = await getProjectTemplate();
     if (!template || !template?.length) {
@@ -84,14 +171,16 @@ class InitCommand extends Command {
       throw new Error("项目模板不存在");
     }
     //1.检查当前项目是否为空
-    if (!this.isCwdDirEmpty()) {
+    if (!isCwdDirEmpty()) {
       let continueTag = false;
       if (!this.force) {
+        const splitStringList = currentProcessPath.split('/')
+        const relativeProcessPath = splitStringList[splitStringList?.length - 1]
         const { isContinue } = await inquirer.prompt([
           {
             type: "confirm",
             name: "isContinue",
-            message: "当前进程文件夹不为空,是否继续创建项目",
+            message: `当前执行目录 ${relativeProcessPath} 文件夹不为空,是否继续创建项目`,
             default: false,
           },
         ]);
@@ -113,22 +202,19 @@ class InitCommand extends Command {
         if (!confirmDel) {
           return;
         }
-        // fse.remove(localPath); //todo:目前是删除至回收站,开发阶段先屏蔽
+        let spinner = spinnerStart('正在清空目录...')
+        await sleep(500)
+        await fse.emptyDir(currentProcessPath); //fixme:目前是删除至回收站,是否有方式删除至回收站
+        spinner.stop()
       }
     }
     const projectInfoRes = await this.getProjectInfo()
-    this.templateInfo = projectInfoRes
-    this.downLoadTemplate(template);
+    this.projectInfo = projectInfoRes
+    await this.downLoadTemplate(template);
     await this.installTemplate()
   }
 
-  isCwdDirEmpty() {
-    let fileList = fs.readdirSync(localPath);
-    fileList = fileList.filter(
-      (file) => !file.startsWith(".") && !["node_modules"].includes(file)
-    );
-    return !fileList || !fileList?.length;
-  }
+
   async getProjectInfo() {
     let projectInfo = {};
     const { initType } = await inquirer.prompt([
@@ -193,7 +279,13 @@ class InitCommand extends Command {
     return projectInfo;
   }
 }
-
+function isCwdDirEmpty() {
+  let fileList = fs.readdirSync(currentProcessPath);
+  fileList = fileList.filter(
+    (file) => !file.startsWith(".") && !["node_modules"].includes(file)
+  );
+  return !fileList || !fileList?.length;
+}
 function init(argv) {
   return new InitCommand(argv);
 }

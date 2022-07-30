@@ -23,6 +23,7 @@
     "@fie-cli/nlog": "file:../../utils/nlog",
     "@fie-cli/init": "file:../../commands/init",
     "@fie-cli/exec": "file:../exec",
+    "@fie-cli/publish": "file:../../commands/publish",
     "colors": "^1.4.0",
     "commander": "^9.3.0",
     "dotenv": "^8.2.0",

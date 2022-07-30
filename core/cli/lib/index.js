@@ -6,13 +6,14 @@ const colors = require('colors') //改变字符串颜色
 const userHome = require('user-home');
 const fs = require('fs');
 const path = require('path');
-const { program } = require('commander');
+const { Command } = require('commander');
 const pkg = require('../package.json')
 const nlog = require("@fie-cli/nlog")
 const { getNpmLatestSemverVersion } = require("@fie-cli/get-npm-info")
 const { init } = require("@fie-cli/init")
-const { exec } = require("@fie-cli/exec")
-
+const { basicExec } = require("@fie-cli/exec")
+// const { init:publish } = require("@fie-cli/publish")
+const program = new Command();
 
 const { LOWEST_NODE_VERSION, DEFAULT_CLI_HOME, NPM_NAME } = require("./constant")
 let args, config;
@@ -53,10 +54,17 @@ function registerCommander() {
     .option('-d, --debug, 是否开启调试模式', false)
     .option('-tp, --targetPath <char>', '是否指定本地调试文件目录', '/')
   program
-    .command('init [projectName...]')
+    .command('init [projectName]')
+    .description('项目初始化')
     .option('-f --force', '是否强制初始化项目')
     .action(init)
-  program.parse(process.argv)
+  program
+    .command('publish')
+    .description('项目发布')
+    .option('--refreshServer', '强制更新远程Git仓库')
+    .option('--refreshToken', '强制更新git token信息')
+    .option('--refreshOwner', '强制更新git owner信息')
+    .action(basicExec)    
   const options = program.opts()
   //对debug命令进行监听
   program.on('option:debug', function () {
@@ -79,6 +87,8 @@ function registerCommander() {
     }
     nlog.level = process.env.LOG_LEVEL;
   })
+  program.parse(process.argv)
+
   if (process.args && process.args.length < 3) {
     program.outputHelp()
     console.log();//打印一行空方便分隔查看
