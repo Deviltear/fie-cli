@@ -21,7 +21,7 @@ class GitHub extends GitServer {
     });
   };
   getRemote(login, repo) {
-    return `git@github.com:${login}/${repo}.git`;
+    return `https://github.com/${login}/${repo}.git`;
   };
   setToken(token) {
     this.request = new GithubRequest(token);

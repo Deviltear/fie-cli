@@ -281,8 +281,11 @@ pnpm-debug.log*
         /*commmit code on this develop branch*/
         await this.checkStash(); //check stash 
         await this.checkConflicted()//check wether there is a conflicte of code 
+        await this.checkoutBranch(this.branch) // checkout local branch 
         //merge remote develop branch
-        // push local develop to remote
+        await this.pullRemoteMasterAndBranch(); //merge remote master branch and then merge remote current branch
+        // push local develop to remotew
+        await this.pushRemoteRepo(this.branch)
     }
 
     async getCorrectVersion() {
@@ -360,14 +363,14 @@ pnpm-debug.log*
             fse.writeJsonSync(`${this.projectPath}/package.json`, pkg, { spaces: 2 });
         }
     };
-    async checkStash   ()  {
+    async checkStash() {
         nlog.notice('检查 stash 记录');
         const stashList = await this.git.stashList();
         if (stashList.all.length > 0) {
-          await this.git.stash([ 'pop' ]);
-          nlog.success('stash pop 成功');
+            await this.git.stash(['pop']);
+            nlog.success('stash pop 成功');
         }
-      };
+    };
     async initAndAddRemote() {
         await this.git.init(this.projectPath);
         nlog.notice('添加 git remote');
@@ -444,6 +447,32 @@ pnpm-debug.log*
             nlog.error('请重新执行 fie publish，如仍然报错请尝试删除 .git 目录后重试');
             process.exit(0);
         });
+    };
+    async checkoutBranch(branch) {
+        const localBranchList = await this.git.branchLocal();
+        if (localBranchList.all.indexOf(branch) >= 0) {
+            await this.git.checkout(branch);
+        } else {
+            await this.git.checkoutLocalBranch(branch);
+        }
+        nlog.success(`分支切换到${branch}`);
+    };
+
+    async pullRemoteMasterAndBranch() {
+        nlog.notice(`合并 [master] -> [${this.branch}]`);
+        await this.pullRemoteRepo('master');
+        nlog.success('合并远程 [master] 分支内容成功');
+        await this.checkConflicted();
+
+        const remoteBranchList = await this.getRemoteBranchList();
+        if (remoteBranchList.indexOf(this.version) >= 0) {
+            nlog.notice(`合并 [${this.branch}] -> [${this.branch}]`);
+            await this.pullRemoteRepo(this.branch);
+            nlog.success(`合并远程 [${this.branch}] 分支内容成功`);
+            await this.checkConflicted();
+        } else {
+            nlog.success(`不存在远程分支 [${this.branch}]`);
+        }
     };
 }
 module.exports = Git;
