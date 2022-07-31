@@ -76,6 +76,7 @@ class Git {
         await this.CheckRemoteGit() //确认远程仓库类型
         await this.checkRepo()//确认远程仓库存在并可自动创建
         await this.checkGitIgnore()//检查或创建.gitignore 文件
+        await this.init() //完成本地git仓库初始化
 
     }
 
@@ -254,9 +255,98 @@ pnpm-debug.log*
         fse.ensureDirSync(gitRootPath)
         return filePath
     }
+    async getRemote() {
+        const gitPath = path.resolve(this.projectPath, GIT_ROOT_DIR);
+        this.remote = this.gitServer.getRemote(this.login, this.name);
+        if (fs.existsSync(gitPath)) {
+            nlog.success('git 已完成初始化');
+            return true;
+        }
+    };
+    async init() {
+        if (await this.getRemote()) {  //if has already gitinit,do not it repeatly
+            return
+        }
+        await this.initAndAddRemote()
+        await this.initCommit()
 
-    init() {
     }
+    async initAndAddRemote() {
+        await this.git.init(this.projectPath);
+        nlog.notice('添加 git remote');
+        const remotes = await this.git.getRemotes(); //gets a list of the named remotes, supply the optional verbose option as true to include the URLs and purpose of each ref
+        nlog.verbose('git remotes', remotes);
+        if (!remotes.find(item => item.name === 'origin')) {
+            await this.git.addRemote('origin', this.remote);
+        }
+    }
+    async initCommit() {
+        await this.checkConflicted() // Check whether there is a conflict of the code 
+        await this.checkNotCommitted() //Check whether there is a no committed of the code
+        if (await this.checkRemoteMaster()) { //if there is origin master
+            nlog.notice('远程存在 master 分支，强制合并');
+            await this.pullRemoteRepo('master', { '--allow-unrelated-histories': null }); // merge the origin master force ,to related  local and origin Master branches
+        } else {
+            await this.pushRemoteRepo('master');
+        }
+    }
+    async checkConflicted() {
+        nlog.info('代码冲突检查')
+        const status = await this.git.status();
+        if (status.conflicted.length > 0) {
+            throw new Error('当前代码存在冲突，请手动处理合并后再试！');
+        }
+        nlog.success('代码检查通过');
+    }
+    async checkNotCommitted() {
+        const status = await this.git.status();
+        if (status.not_added.length ||
+            status.created.length ||
+            status.deleted.length ||
+            status.modified.length ||
+            status.renamed.length) {
+            nlog.verbose('status', status);
+            await this.git.add(status.not_added);
+            await this.git.add(status.created);
+            await this.git.add(status.deleted);
+            await this.git.add(status.modified);
+            await this.git.add(status.renamed);
+            let message;
+            while (!message) {
+                const { commitMsg } = await inquirer.prompt({
+                    type: 'text',
+                    message: '请输入 commit 信息：',
+                    defaultValue: '',
+                    name: "commitMsg",
+                });
+                message = commitMsg
+            }
+            await this.git.commit(message);
+            nlog.success('本地 commit 提交成功');
+        }
+    };
+    async checkRemoteMaster() {
+        return (await this.git.listRemote(['--refs'])).includes('refs/heads/master');
+    };
+    async pushRemoteRepo(branchName) {
+        nlog.notice(`推送代码至远程 ${branchName} 分支`);
+        await this.git.push('origin', branchName);
+        nlog.success('推送代码成功');
+    };
 
+    async pullRemoteRepo(branchName, options = {}) {
+        nlog.notice(`同步远程 ${branchName} 分支代码`);
+        await this.git.pull('origin', branchName, options).catch(err => {
+            if (err.message.indexOf('Permission denied (publickey)') >= 0) {
+                throw new Error(`请获取本地 ssh publickey 并配置到：${this.gitServer.getSSHKeysUrl()}，配置方法：${this.gitServer.getSSHKeysHelpUrl()}`);
+            } else if (err.message.indexOf('Couldn\'t find remote ref ' + branchName) >= 0) {
+                nlog.notice('获取远程 [' + branchName + '] 分支失败');
+            } else {
+                nlog.error(err.message);
+            }
+            nlog.error('请重新执行 fie publish，如仍然报错请尝试删除 .git 目录后重试');
+            process.exit(0);
+        });
+    };
 }
 module.exports = Git;

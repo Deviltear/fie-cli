@@ -1,18 +1,18 @@
-const  GitServer = require('./GitServer')
+const GitServer = require('./GitServer')
 const GithubRequest = require("./GithubRequest");
 
 class GitHub extends GitServer {
 
-  constructor (){
+  constructor() {
     super('gitHub')
-  } 
-  getUser  ()  {
+  }
+  getUser() {
     return this.request.get('/user').then(response => {
       return this.handleResponse(response);
     });
   };
 
-  getOrgs  ()  {
+  getOrgs() {
     return this.request.get('/user/orgs', {
       page: 1,
       per_page: 100,
@@ -20,17 +20,20 @@ class GitHub extends GitServer {
       return this.handleResponse(response);
     });
   };
-  setToken (token)  {
+  getRemote(login, repo) {
+    return `git@github.com:${login}/${repo}.git`;
+  };
+  setToken(token) {
     this.request = new GithubRequest(token);
   };
 
-  getRepo(owner, repo)  {
+  getRepo(owner, repo) {
     return this.request.get(`/repos/${owner}/${repo}`).then(response => {
       return this.handleResponse(response);
     });
   };
 
-  createRepo  (repo)  {
+  createRepo(repo) {
     return this.request.post('/user/repos', {
       name: repo,
     }, {
@@ -38,15 +41,15 @@ class GitHub extends GitServer {
     });
   };
 
-  createOrgRepo  (repo, login)  {
+  createOrgRepo(repo, login) {
     return this.request.post('/orgs/' + login + '/repos', {
       name: repo,
     }, {
       Accept: 'application/vnd.github.v3+json',
     });
   };
-  
-  getTokenHelpUrl(){
+
+  getTokenHelpUrl() {
     return 'https://github.com/settings/tokens';
   }
   getSSHKeysUrl = () => {
