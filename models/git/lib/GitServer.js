@@ -17,9 +17,16 @@ class GitServer {
   createOrgRepo() { //创建远程组织仓库
     error("createOrgRepo")
   }
-  getRemote() { //创建远程仓库
+  getRemote() { //获取远程仓库
     error("getRemote")
   }
+  getRepo() { //获取远程仓库
+    error('getRepo');
+  };
+
+  createOrgRepo  ()  { //创建远程组织型仓库
+    error('createOrgRepo');
+  };
   getUser() { //获取用户
     error("getUser")
   }

@@ -5,7 +5,7 @@ const userHome = require("user-home");
 const fse = require("fs-extra");
 const inquirer = require("inquirer");
 const terminalLink = require('terminal-link')
-const { readFile, writeFile } = require("@fie-cli/util");
+const { readFile, writeFile, spinnerStart } = require("@fie-cli/util");
 const nlog = require('@fie-cli/nlog');
 const simpleGit = require('simple-git');
 const GitHub = require('./GitHub');
@@ -49,7 +49,7 @@ class Git {
          * @param sshIp 远程服务器IP
          * @param sshPath 远程服务器路径
          */
-        const { name, version, projectPath, refreshGit = false, refreshToken = false, refreshOwner = false } = info || {}
+        const { name, version, projectPath, refreshServer = false, refreshToken = false, refreshOwner = false } = info || {}
         this.name = name
         this.version = version
         this.projectPath = projectPath
@@ -73,6 +73,10 @@ class Git {
         await this.checkGitToken() //获取远程仓库类型
         await this.getUserAndOrgs() //获取远程仓库类型
         await this.CheckRemoteGit() //确认远程仓库类型
+        await this.CheckRemoteGit() //确认远程仓库类型
+        await this.checkRepo()//确认远程仓库存在并可自动创建
+        await this.checkGitIgnore()//检查或创建.gitignore 文件
+
     }
 
 
@@ -177,36 +181,36 @@ class Git {
         this.login = login;
 
     }
+
+    async checkRepo() {
+        let repo = await this.gitServer.getRepo(this.login, this.name)
+        if (!repo) {
+            let spinner = spinnerStart('开始创建远程仓库')
+            try {
+                if (this.owner === "user") {
+                    repo = await this.gitServer.createRepo(this.name);
+                } else {
+                    repo = await this.gitServer.createOrgRepo(this.name, this.login);
+                }
+            } finally {
+                spinner.stop();
+            }
+            if (repo) {
+                nlog.success('远程仓库创建成功');
+            } else {
+                throw new Error('远程仓库创建失败');
+            }
+        }
+        nlog.success('远程仓库信息获取成功');
+        this.repo = repo;
+    }
+
     // 检查 .gitignore
     async checkGitIgnore() {
-        const gitIgnore = path.resolve(this.dir, GIT_IGNORE_FILE);
+        const gitIgnore = path.resolve(this.projectPath, GIT_IGNORE_FILE);
         if (!fs.existsSync(gitIgnore)) {
-            if (this.isComponent()) {
-                writeFile(gitIgnore, `.DS_Store
-    node_modules
-                
-                
-    # local env files
-    .env.local
-    .env.*.local
-                
-    # Log files
-    npm-debug.log*
-    yarn-debug.log*
-    yarn-error.log*
-    pnpm-debug.log*
-                
-    # Editor directories and files
-    .idea
-    .vscode
-    *.suo
-    *.ntvs*
-    *.njsproj
-    *.sln
-    *.sw?`);
-                log.success('自动写入 .gitignore 文件');
-            } else {
-                writeFile(gitIgnore, `.DS_Store
+
+            writeFile(gitIgnore, `.DS_Store
 node_modules
 /dist
 
@@ -229,8 +233,8 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?`);
-                log.success('自动写入 .gitignore 文件');
-            }
+            nlog.success('自动写入 .gitignore 文件');
+
         }
     };
 
