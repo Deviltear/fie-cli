@@ -2,6 +2,7 @@
 const path = require('path')
 const fs = require('fs')
 const userHome = require("user-home");
+const semver = require('semver');
 const fse = require("fs-extra");
 const inquirer = require("inquirer");
 const terminalLink = require('terminal-link')
@@ -17,7 +18,8 @@ const GIT_TOKEN_FILE = '.git_token'
 const GIT_OWNER_FILE = '.git_owner'
 const GIT_LOGIN_FILE = '.git_login'
 const GIT_IGNORE_FILE = '.gitignore';
-
+const VERSION_RELEASE = 'release';
+const VERSION_DEVELOP = 'dev';
 
 
 const GIT_OWNER_TYPE = [{
@@ -48,6 +50,7 @@ class Git {
          * @param sshUser 远程服务器用户名
          * @param sshIp 远程服务器IP
          * @param sshPath 远程服务器路径
+         * @param branch 本地开发分支
          */
         const { name, version, projectPath, refreshServer = false, refreshToken = false, refreshOwner = false } = info || {}
         this.name = name
@@ -63,6 +66,7 @@ class Git {
         this.orgs = null
         this.homePath = null
         this.gitServer = null  //这些一开始为null的是为了先定义出来,方便阅读,都用到了那些属性
+        this.branch = null
 
 
     }
@@ -271,6 +275,99 @@ pnpm-debug.log*
         await this.initCommit()
 
     }
+    async commit() {
+        //generate a develop branch
+        await this.getCorrectVersion();
+        /*commmit code on this develop branch*/
+        await this.checkStash(); //check stash 
+        await this.checkConflicted()//check wether there is a conflicte of code 
+        //merge remote develop branch
+        // push local develop to remote
+    }
+
+    async getCorrectVersion() {
+        /** 
+         * 分支规范 发布分支 release/x.y.z, 开发分支 dev/x.y.z
+         * 版本号增加规范 : major/minor/patch (大中小)
+        */
+        nlog.notice('获取代码分支');
+        const remoteBranchList = await this.getRemoteBranchList(VERSION_RELEASE);
+        let releaseVersion = null;
+        if (remoteBranchList && remoteBranchList.length > 0) {
+            // 获取最近的线上版本
+            releaseVersion = remoteBranchList[0];
+        }
+        const devVersion = this.version;
+        if (!releaseVersion) {
+            this.branch = `${VERSION_DEVELOP}/${devVersion}`;
+        } else if (semver.gt(this.version, releaseVersion)) {
+            nlog.info('当前版本大于线上最新版本', `${devVersion} >= ${releaseVersion}`);
+            this.branch = `${VERSION_DEVELOP}/${devVersion}`;
+        } else {
+            nlog.notice('当前线上版本大于或等于本地版本', `${releaseVersion} >= ${devVersion}`);
+            const { incType } = await inquirer.prompt({
+                type: 'list',
+                choices: [{
+                    name: `小版本（${releaseVersion} -> ${semver.inc(releaseVersion, 'patch')}）`,
+                    value: 'patch',
+                }, {
+                    name: `中版本（${releaseVersion} -> ${semver.inc(releaseVersion, 'minor')}）`,
+                    value: 'minor',
+                }, {
+                    name: `大版本（${releaseVersion} -> ${semver.inc(releaseVersion, 'major')}）`,
+                    value: 'major',
+                }],
+                defaultValue: 'patch',
+                message: '自动升级版本，请选择升级版本类型',
+                name: 'incType'
+            });
+            const incVersion = semver.inc(releaseVersion, incType);
+            this.branch = `${VERSION_DEVELOP}/${incVersion}`;
+            this.version = incVersion;
+            this.syncVersionToPackageJson();
+        }
+        nlog.success(`代码分支获取成功 ${this.branch}`);
+    };
+    // get remote branch list
+    async getRemoteBranchList(type) {
+        // git ls-remote --refs
+        const remoteList = await this.git.listRemote(['--refs']);
+        let reg;
+        if (type === VERSION_RELEASE) {
+            reg = /.+?refs\/tags\/release\/(\d+\.\d+\.\d+)/g;
+        } else {
+            reg = /.+?refs\/heads\/dev\/(\d+\.\d+\.\d+)/g;
+        }
+        return remoteList.split('\n').map(remote => {
+            const match = reg.exec(remote);
+            reg.lastIndex = 0;// 通过此方式可重新执行正则匹配,以免多个符合条件的分支存在时只获取一次,而非最新
+            if (match && semver.valid(match[1])) {
+                return match[1];
+            }
+        }).filter(_ => _).sort((a, b) => { //filter(_ => _)可返回数组中值为真的元素,去空
+            if (semver.lte(b, a)) {
+                if (a === b) return 0;
+                return -1;
+            }
+            return 1;
+        });
+    };
+    // write the current release version to package.json
+    syncVersionToPackageJson() {
+        const pkg = fse.readJsonSync(`${this.projectPath}/package.json`);
+        if (pkg && pkg.version !== this.version) {
+            pkg.version = this.version;
+            fse.writeJsonSync(`${this.projectPath}/package.json`, pkg, { spaces: 2 });
+        }
+    };
+    async checkStash   ()  {
+        nlog.notice('检查 stash 记录');
+        const stashList = await this.git.stashList();
+        if (stashList.all.length > 0) {
+          await this.git.stash([ 'pop' ]);
+          nlog.success('stash pop 成功');
+        }
+      };
     async initAndAddRemote() {
         await this.git.init(this.projectPath);
         nlog.notice('添加 git remote');
