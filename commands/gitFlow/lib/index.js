@@ -35,7 +35,7 @@ class Gitflow extends Command {
         await this.checkGitIgnore()
         await this.getCurrentBranch() //add current local head branch to this instance
         /*commmit code on this develop branch*/
-        await this.checkStash(); //check stash 
+        // await this.checkStash(); //check stash 
         await this.checkNotCommitted()//check wether there is code in stage 
         await this.checkConflicted()
         await this.pushRemoteRepo(this.currentBranch)
