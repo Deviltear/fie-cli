@@ -12,7 +12,6 @@ const nlog = require("@fie-cli/nlog")
 const { getNpmLatestSemverVersion } = require("@fie-cli/get-npm-info")
 const { init } = require("@fie-cli/init")
 const { basicExec } = require("@fie-cli/exec")
-// const { init:publish } = require("@fie-cli/publish")
 const program = new Command();
 
 const { LOWEST_NODE_VERSION, DEFAULT_CLI_HOME, NPM_NAME } = require("./constant")
@@ -64,7 +63,13 @@ function registerCommander() {
     .option('--refreshServer', '强制更新远程Git仓库')
     .option('--refreshToken', '强制更新git token信息')
     .option('--refreshOwner', '强制更新git owner信息')
-    .action(basicExec)    
+    .action(basicExec)   
+    program
+    .command('gitFlow')
+    .description('git提交自动化')
+    .option('-c --create, 创建分支')
+    .option('-ap --allPush, 自动提交推送至各个分支')
+    .action(basicExec)  
   const options = program.opts()
   //对debug命令进行监听
   program.on('option:debug', function () {
