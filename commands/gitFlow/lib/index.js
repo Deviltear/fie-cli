@@ -1,5 +1,5 @@
 'use strict';
-
+//todo: auto generate daily release branch and patch a tag. tag need get current tag version,how todo it ?
 const path = require('path')
 const inquirer = require("inquirer");
 const nlog = require('@fie-cli/nlog');
@@ -35,8 +35,7 @@ class Gitflow extends Command {
         await this.checkGitIgnore()
         await this.getCurrentBranch() //add current local head branch to this instance
         /*commmit code on this develop branch*/
-        // await this.checkStash(); //check stash 
-        await this.checkNotCommitted()//check wether there is code in stage 
+        await this.checkOnlyStageNotCommitted()//check wether there is code in stage 
         await this.checkConflicted()
         await this.pushRemoteRepo(this.currentBranch)
 
@@ -50,19 +49,16 @@ class Gitflow extends Command {
             });
             this.pushBranch = remoteBranchListObj[pushBranch]
         }
-        this.pushBranch.forEach(async (branchName) => {
-
+        for (let branchName of this.pushBranch) {
             await this.checkoutBranch(branchName) // checkout local branch 
-            await this.mergeBranch(branchName)
-            await this.pullRemoteRepo(branchName,{ '--allow-unrelated-histories': null })
+            await this.mergeBranch(branchName, { '--allow-unrelated-histories': null })
+            await this.pullRemoteRepo(branchName, { '--allow-unrelated-histories': null })
             await this.checkConflicted()//check wether there is a conflicte of code 
-            await this.pushRemoteRepo(branchName,{ '--allow-unrelated-histories': null })
-
-        });
-
-
-
-        // await this.pullRemoteMasterAndBranch(); //merge remote master branch and then merge remote current branch
+            await this.pushRemoteRepo(branchName)
+            await this.checkoutBranch(this.currentBranch) // completed merge remote checkout this original target branch  
+        }
+        // todo: generate daily branch need do pullRemoteMasterBranch fn 
+        // await this.pullRemoteMasterBranch(); //merge remote master branch and then merge remote current branch
 
     }
 
@@ -80,6 +76,24 @@ class Gitflow extends Command {
         }
         nlog.success('代码冲突检查通过');
     }
+    async checkOnlyStageNotCommitted() {
+        const status = await simplegit.status();
+        const { staged = [] } = status || {}
+        if (staged.length) {
+            let message;
+            while (!message) {
+                const { commitMsg } = await inquirer.prompt({
+                    type: 'text',
+                    message: '请输入 commit 信息：',
+                    defaultValue: '',
+                    name: "commitMsg",
+                });
+                message = commitMsg
+            }
+            await simplegit.commit(message);
+            nlog.success('本地 commit 提交成功');
+        }
+    };
     async checkNotCommitted() {
         const status = await simplegit.status();
         if (status.not_added.length ||
@@ -118,9 +132,8 @@ class Gitflow extends Command {
     };
 
     async pushRemoteRepo(branchName) {
-        nlog.notice(`推送代码至远程 ${branchName} 分支`);
-        await simplegit.push('origin', branchName);
-        nlog.success('推送代码成功');
+        await simplegit.push(['-u', 'origin', branchName])
+        nlog.success(`推送代码至远程 ${branchName} 分支成功`);
     };
     async checkGitIgnore() {
         const gitIgnore = path.resolve(projectPath, '.gitignore');
@@ -132,12 +145,11 @@ class Gitflow extends Command {
         const status = await simplegit.status()
         this.currentBranch = status.current
     }
-    async mergeBranch(branchName) {
-        await simplegit.mergeFromTo(this.currentBranch, branchName, { '--allow-unrelated-histories': null })
+    async mergeBranch(branchName, options = {}) {
+        await simplegit.mergeFromTo(this.currentBranch, branchName, options)
         nlog.success(`合并${this.currentBranch}代码至 ${branchName} 分支`);
     };
     async pullRemoteRepo(branchName, options = {}) {
-        nlog.notice(`同步远程 ${branchName} 分支代码`);
         await simplegit.pull('origin', branchName, options).catch(err => {
             if (err.message.indexOf('Permission denied (publickey)') >= 0) {
                 throw new Error(`请获取本地 ssh publickey 并配置到`);
@@ -146,17 +158,17 @@ class Gitflow extends Command {
             } else {
                 nlog.error(err.message);
             }
-            nlog.error('请重新执行 fie gitFlow，如仍然报错请尝试删除 .git 目录后重试');
+            nlog.error('请重新执行 fie gitFlow，如仍然报错请尝试进行手动git操作');
             process.exit(0);
         });
+        nlog.success(`同步远程 ${branchName} 分支代码成功`);
+
     };
-    async pullRemoteMasterAndBranch() {
+    async pullRemoteMasterBranch() {
         nlog.notice(`合并 [master] -> [${this.branch}]`);
         await this.pullRemoteRepo('master');
         nlog.success('合并远程 [master] 分支内容成功');
         await this.checkConflicted();
-        await this.pullRemoteRepo(this.branch);
-        nlog.success(`合并远程 [${this.branch}] 分支内容成功`);
 
     };
 }
