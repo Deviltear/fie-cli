@@ -13,12 +13,12 @@ const remoteBranchListObj = {
     'release': ['release'],
     'all': ['develop', 'release']
 }
-const CHOOSE_REMOTE_BRANCH = [{ name: 'develop', value: "develop" }, { name: 'release', value: "release" }, { name: 'devAndrelease', value: "all" }]
+const CHOOSE_REMOTE_BRANCH = [{ name: 'develop', value: "develop" }, { name: 'release', value: "release" }, { name: 'developAndrelease', value: "all" }]
 class Gitflow extends Command {
 
     init() {
-        const { allPush, create } = this._cmd || {}
-        this.allPush = allPush
+        const { chooseBranch, create } = this._cmd || {}
+        this.chooseBranch = chooseBranch
         this.create = create
         this.pushBranch = remoteBranchListObj.all
     }
@@ -39,10 +39,10 @@ class Gitflow extends Command {
         await this.checkConflicted()
         await this.pushRemoteRepo(this.currentBranch)
 
-        if (this.allPush) {
+        if (this.chooseBranch) {
             const { pushBranch } = await inquirer.prompt({
                 type: 'list',
-                message: '选择要合并提交至那些远程分支',
+                message: '选择要合并提交至哪些远程分支',
                 defaultValue: 'all',
                 name: "pushBranch",
                 choices: CHOOSE_REMOTE_BRANCH
@@ -51,12 +51,13 @@ class Gitflow extends Command {
         }
         for (let branchName of this.pushBranch) {
             await this.checkoutBranch(branchName) // checkout local branch 
-            await this.mergeBranch(branchName, { '--allow-unrelated-histories': null })
             await this.pullRemoteRepo(branchName, { '--allow-unrelated-histories': null })
+            await this.mergeBranch(branchName, { '--allow-unrelated-histories': null })
             await this.checkConflicted()//check wether there is a conflicte of code 
             await this.pushRemoteRepo(branchName)
-            await this.checkoutBranch(this.currentBranch) // completed merge remote checkout this original target branch  
+
         }
+        await this.checkoutBranch(this.currentBranch) // completed merge remote checkout this original target branch  
         // todo: generate daily branch need do pullRemoteMasterBranch fn 
         // await this.pullRemoteMasterBranch(); //merge remote master branch and then merge remote current branch
 
@@ -132,7 +133,16 @@ class Gitflow extends Command {
     };
 
     async pushRemoteRepo(branchName) {
-        await simplegit.push(['-u', 'origin', branchName])
+        await simplegit.push(['-u', 'origin', branchName]).catch(async (err) => {
+            console.log(err,'push出错');
+            if (err.message.includes('branch is behind')) {//fixme:是因为远程对应的分支又有新的提交而造成的
+                await this.pullRemoteRepo(branchName, { '--allow-unrelated-histories': null })
+                await this.checkConflicted()
+                await simplegit.push(['-u', 'origin', branchName])
+            }
+            throw new Error('推送失败,请重试或手动操作')
+        })
+
         nlog.success(`推送代码至远程 ${branchName} 分支成功`);
     };
     async checkGitIgnore() {
