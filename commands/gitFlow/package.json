@@ -1,7 +1,7 @@
 {
-  "name": "@fie-cli/git",
+  "name": "@fie-cli/gitflow",
   "version": "1.0.0",
-  "description": "@fie-cli/git",
+  "description": "自动化git流程",
   "author": "xiaowei zhou <19337129021@163.com>",
   "homepage": "https://github.com/Deviltear/fie-cli#readme",
   "license": "ISC",
@@ -28,13 +28,8 @@
   },
   "dependencies": {
     "@fie-cli/nlog": "file:../../utils/nlog",
-    "@fie-cli/util": "file:../../utils/util",
-    "fs-extra": "10.1.0",
-    "inquirer": "8.0.0",
-    "simple-git": "^3.10.0",
-    "terminal-link": "^2.1.1",
-    "user-home": "^3.0.0",
-    "axios": "^0.27.2",
-    "semver": "7.3.7"
+    "@fie-cli/command": "file:../../models/command",
+    "simple-git": "3.10.0",
+    "inquirer": "8.0.0"
   }
 }

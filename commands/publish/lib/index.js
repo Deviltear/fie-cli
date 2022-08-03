@@ -20,8 +20,8 @@ class PulishCommand extends Command {
             const startTime = new Date().getTime()
             this.prepare()
             const git = new Git({ ...this.projectInfo, ...this.otherOptoins })
-            await git.prepare()
-            git.init()
+            await git.prepare()// 自动化提交准备和代码仓库初始化
+           await  git.commit() //代码自动化提交
             const endTime = new Date().getTime()
             nlog.info(`本次发布耗时: ${Math.floor(endTime - startTime) / 1000} 秒`)
 
