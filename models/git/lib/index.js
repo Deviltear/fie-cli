@@ -465,7 +465,7 @@ pnpm-debug.log*
         await this.checkConflicted();
 
         const remoteBranchList = await this.getRemoteBranchList();
-        if (remoteBranchList.indexOf(this.version) >= 0) {
+        if (remoteBranchList.indexOf(this.branch) >= 0) {
             nlog.notice(`合并 [${this.branch}] -> [${this.branch}]`);
             await this.pullRemoteRepo(this.branch);
             nlog.success(`合并远程 [${this.branch}] 分支内容成功`);

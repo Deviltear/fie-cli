@@ -30,6 +30,8 @@
     "@fie-cli/nlog": "file:../../utils/nlog",
     "@fie-cli/command": "file:../../models/command",
     "simple-git": "3.10.0",
-    "inquirer": "8.0.0"
+    "inquirer": "8.0.0",
+    "fs-extra": "10.1.0",
+    "semver": "7.3.7"
   }
 }

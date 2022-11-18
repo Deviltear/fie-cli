@@ -67,7 +67,7 @@ function registerCommander() {
     program
     .command('gitFlow')
     .description('git提交自动化')
-    .option('-c --create, 创建分支')
+    .option('-re --createRelese, 创建分支')
     .option('-cb --chooseBranch, 选择要合并提交至哪些远程分支')
     .action(basicExec)  
   const options = program.opts()
