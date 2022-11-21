@@ -31,8 +31,9 @@ class Gitflow extends Command {
   async exec() {
     try {
       if (this.createRelese) {
-       await this.getRemoteBranchList();
-       await this.syncVersionToPackageJson();
+      //  await this.getRemoteBranchList();
+      //  await this.syncVersionToPackageJson();
+       await this.autoCommitAndPushVersionCode()
         return;
       }
       await this.commit(); //代码自动化提交
@@ -197,43 +198,61 @@ class Gitflow extends Command {
     await this.checkConflicted();
   }
   async syncVersionToPackageJson() {
-    const pkg = fse.readJsonSync(`${projectPath}/version.json`);
-    const releaseVersion = pkg.version;
-    const { incType } = await inquirer.prompt({
-      type: "list",
-      choices: [
-        {
-          name: `小版本（${releaseVersion} -> ${semver.inc(
-            releaseVersion,
-            "patch",
-          )}）`,
-          value: "patch",
-        },
-        {
-          name: `中版本（${releaseVersion} -> ${semver.inc(
-            releaseVersion,
-            "minor",
-          )}）`,
-          value: "minor",
-        },
-        {
-          name: `大版本（${releaseVersion} -> ${semver.inc(
-            releaseVersion,
-            "major",
-          )}）`,
-          value: "major",
-        },
-      ],
-      defaultValue: "patch",
-      message: "自动升级版本，请选择升级版本类型",
-      name: "incType",
-    });
-    if (pkg && pkg.version !== this.version) {
-      const incVersion = semver.inc(releaseVersion, incType);
-      pkg.version = incVersion;
+try {
+  const pkg = fse.readJsonSync(`${projectPath}/version.json`);
+  const releaseVersion = pkg.version;
+  const { incType } = await inquirer.prompt({
+    type: "list",
+    choices: [
+      {
+        name: `小版本（${releaseVersion} -> ${semver.inc(
+          releaseVersion,
+          "patch",
+        )}）`,
+        value: "patch",
+      },
+      {
+        name: `中版本（${releaseVersion} -> ${semver.inc(
+          releaseVersion,
+          "minor",
+        )}）`,
+        value: "minor",
+      },
+      {
+        name: `大版本（${releaseVersion} -> ${semver.inc(
+          releaseVersion,
+          "major",
+        )}）`,
+        value: "major",
+      },
+    ],
+    defaultValue: "patch",
+    message: "自动升级版本，请选择升级版本类型",
+    name: "incType",
+  });
+  if (pkg && pkg.version !== this.version) {
+    const incVersion = semver.inc(releaseVersion, incType);
+    pkg.version = incVersion;
 
-      fse.writeJsonSync(`${projectPath}/version.json`, pkg, { spaces: 2 });
+    fse.writeJsonSync(`${projectPath}/version.json`, pkg, { spaces: 2 });
+  } 
+  nlog.success(`已将版本号修改为${pkg.version}`)
+} catch (error) {
+  nlog.error(error)
+}
+  }
+  async autoCommitAndPushVersionCode() {
+    const status = await simplegit.status();
+    console.log(status);
+
+    const modifiedList =status?.modified?.filter(v=>v!== 'version.json');
+
+    if (modifiedList.length) {
+      return nlog.error('存在版本号文件之外的修改,请检查手动提交')
     }
+    await simplegit.add('./*')
+    .commit('update version.json')
+    await simplegit
   }
   // get remote branch list
   async getRemoteBranchList() {
@@ -243,11 +262,11 @@ class Gitflow extends Command {
     const remoteNameList = remoteList.all;
     const yearStr = String(this.date.getFullYear());
     const monthStr = String(this.date.getMonth() + 1).padStart(2, "0");
-    const dayStr = String(this.date.getDate() + 1).padStart(2, "0");
+    const dayStr = String(this.date.getDate()).padStart(2, "0");
 
     const dailyBranchName = `release_${yearStr}${monthStr}${dayStr}`;
 
-    if (0) {
+    if (remoteNameList.includes(`origin/${dailyBranchName}`)) {
       nlog.error(`已存在远程分支 origin/${dailyBranchName}`);
     } else {
       await simplegit.checkoutBranch(dailyBranchName, `origin/master`);
