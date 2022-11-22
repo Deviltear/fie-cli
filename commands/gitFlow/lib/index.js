@@ -31,8 +31,8 @@ class Gitflow extends Command {
   async exec() {
     try {
       if (this.createRelese) {
-      //  await this.getRemoteBranchList();
-      //  await this.syncVersionToPackageJson();
+       await this.getRemoteBranchList();
+       await this.syncVersionToPackageJson();
        await this.autoCommitAndPushVersionCode()
         return;
       }
@@ -243,8 +243,6 @@ try {
   }
   async autoCommitAndPushVersionCode() {
     const status = await simplegit.status();
-    console.log(status);
-
     const modifiedList =status?.modified?.filter(v=>v!== 'version.json');
 
     if (modifiedList.length) {
@@ -252,7 +250,9 @@ try {
     }
     await simplegit.add('./*')
     .commit('update version.json')
-    await simplegit
+    await this.checkConflicted()
+    await this.pushRemoteRepo( this.currentBranch)
+    nlog.success(`已成功创建发版分支${this.currentBranch} ,并修改版本号推送至远程`)
   }
   // get remote branch list
   async getRemoteBranchList() {
@@ -270,6 +270,7 @@ try {
       nlog.error(`已存在远程分支 origin/${dailyBranchName}`);
     } else {
       await simplegit.checkoutBranch(dailyBranchName, `origin/master`);
+      await this.getCurrentBranch()
     }
   }
 }
