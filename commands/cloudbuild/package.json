@@ -1,7 +1,7 @@
 {
-  "name": "@fie-cli/gitflow",
+  "name": "@fie-cli/cloudbuild",
   "version": "1.0.0",
-  "description": "自动化git流程",
+  "description": "@fie-cli/cloudbuild",
   "author": "xiaowei zhou <19337129021@163.com>",
   "homepage": "https://github.com/Deviltear/fie-cli#readme",
   "license": "ISC",
@@ -27,11 +27,6 @@
     "url": "https://github.com/Deviltear/fie-cli/issues"
   },
   "dependencies": {
-    "@fie-cli/nlog": "file:../../utils/nlog",
-    "@fie-cli/command": "file:../../models/command",
-    "simple-git": "3.10.0",
-    "inquirer": "8.0.0",
-    "fs-extra": "10.1.0",
-    "semver": "7.3.7"
+    "socket.io-client": "^2.0.0"
   }
 }
