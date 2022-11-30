@@ -1,6 +1,6 @@
 {
   "name": "@fie-cli/cloudbuild",
-  "version": "1.0.0",
+  "version": "1.0.1-alpha.0",
   "description": "@fie-cli/cloudbuild",
   "author": "xiaowei zhou <19337129021@163.com>",
   "homepage": "https://github.com/Deviltear/fie-cli#readme",

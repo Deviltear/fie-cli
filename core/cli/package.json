@@ -1,6 +1,6 @@
 {
   "name": "@fie-cli/core",
-  "version": "1.0.0",
+  "version": "1.0.1-alpha.0",
   "description": "fie-cli/core",
   "author": "xiaowei zhou <19337129021@163.com>",
   "homepage": "",
@@ -19,12 +19,12 @@
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "dependencies": {
-    "@fie-cli/get-npm-info": "file:../../utils/get-npm-info",
-    "@fie-cli/nlog": "file:../../utils/nlog",
-    "@fie-cli/init": "file:../../commands/init",
     "@fie-cli/exec": "file:../exec",
-    "@fie-cli/publish": "file:../../commands/publish",
+    "@fie-cli/get-npm-info": "file:../../utils/get-npm-info",
     "@fie-cli/gitFlow": "file:../../commands/gitFlow",
+    "@fie-cli/init": "file:../../commands/init",
+    "@fie-cli/nlog": "file:../../utils/nlog",
+    "@fie-cli/publish": "file:../../commands/publish",
     "colors": "^1.4.0",
     "commander": "9.3.0",
     "dotenv": "^8.2.0",

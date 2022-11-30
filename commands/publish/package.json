@@ -1,6 +1,6 @@
 {
   "name": "@fie-cli/publish",
-  "version": "1.0.0",
+  "version": "1.0.1-alpha.0",
   "description": "@fie-cli/publish",
   "author": "xiaowei zhou <19337129021@163.com>",
   "homepage": "https://github.com/Deviltear/fie-cli#readme",
@@ -28,8 +28,8 @@
   },
   "dependencies": {
     "@fie-cli/command": "file:../../models/command",
-    "fs-extra": "^10.1.0",
+    "@fie-cli/git": "file:../../models/git",
     "@fie-cli/nlog": "file:../../utils/nlog",
-    "@fie-cli/git": "file:../../models/git"
+    "fs-extra": "^10.1.0"
   }
 }

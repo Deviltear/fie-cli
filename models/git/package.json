@@ -1,6 +1,6 @@
 {
   "name": "@fie-cli/git",
-  "version": "1.0.0",
+  "version": "1.0.1-alpha.0",
   "description": "@fie-cli/git",
   "author": "xiaowei zhou <19337129021@163.com>",
   "homepage": "https://github.com/Deviltear/fie-cli#readme",
@@ -29,12 +29,12 @@
   "dependencies": {
     "@fie-cli/nlog": "file:../../utils/nlog",
     "@fie-cli/util": "file:../../utils/util",
+    "axios": "^0.27.2",
     "fs-extra": "10.1.0",
     "inquirer": "8.0.0",
+    "semver": "7.3.7",
     "simple-git": "^3.10.0",
     "terminal-link": "^2.1.1",
-    "user-home": "^3.0.0",
-    "axios": "^0.27.2",
-    "semver": "7.3.7"
+    "user-home": "^3.0.0"
   }
 }
