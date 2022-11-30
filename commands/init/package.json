@@ -20,15 +20,16 @@
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "dependencies": {
-    "@fie-cli/command": "file:../../models/command",
-    "@fie-cli/nlog": "file:../../utils/nlog",
-    "@fie-cli/package": "file:../../models/package",
-    "@fie-cli/request": "file:../../utils/request",
-    "@fie-cli/util": "file:../../utils/util",
+    "@fie-cli/command": "^1.0.1-alpha.0",
+    "@fie-cli/nlog": "^1.0.1-alpha.0",
+    "@fie-cli/package": "^1.0.1-alpha.0",
+    "@fie-cli/request": "^1.0.1-alpha.0",
+    "@fie-cli/util": "^1.0.1-alpha.0",
     "ejs": "^3.1.8",
     "fs-extra": "^10.1.0",
     "glob": "^8.0.3",
     "inquirer": "8.0.0",
     "user-home": "^3.0.0"
-  }
+  },
+  "gitHead": "ac8ddb68895040886d3639d2c3644d73bd9a39bd"
 }

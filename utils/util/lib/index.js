@@ -17,7 +17,7 @@ function spinnerStart(startString = "Loading", startText) {
 function sleep(timeOut = 1000) {
     return new Promise(resolve => setTimeout(resolve, timeOut))
 }
-function cpSpawnAsync(command, args, options) { //兼容win 系统的情况,win 终端是cmd 命令
+function cpSpawnAsync(command, args, options) { //兼容win 系统的情况,win 终端是cmd  命令
     return new Promise((resolve, rejects) => {
         const win32 = process.platform === "win32";
         const cmd = win32 ? "cmd" : command;

@@ -29,5 +29,6 @@
   "dependencies": {
     "colors": "^1.4.0",
     "semver": "^7.3.7"
-  }
+  },
+  "gitHead": "ac8ddb68895040886d3639d2c3644d73bd9a39bd"
 }
