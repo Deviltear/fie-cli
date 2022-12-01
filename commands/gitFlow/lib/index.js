@@ -70,8 +70,6 @@ class Gitflow extends Command {
       await this.pushRemoteRepo(branchName);
     }
     await this.checkoutBranch(this.currentBranch); // completed merge remote checkout this original target branch
-    // todo: generate daily branch need do pullRemoteMasterBranch fn
-    // await this.pullRemoteMasterBranch(); //merge remote master branch and then merge remote current branch
   }
 
   async checkStash() {
@@ -260,6 +258,19 @@ class Gitflow extends Command {
     await this.pushRemoteRepo(this.currentBranch)
     nlog.success(`已成功创建发版分支${this.currentBranch} ,并修改版本号推送至远程`)
   }
+
+  async inquirerYesOrNo(inquirerMsg) {
+    const { isModifyVersion } = await inquirer.prompt({
+      type: "list",
+      message: inquirerMsg,
+      defaultValue: "no",
+      name: "isModifyVersion",
+      choices: [{ name: "是", value: "yes" },
+      { name: "否", value: "no" }]
+    });
+    return isModifyVersion
+  }
+
   // get remote branch list
   async getRemoteBranchList() {
     await simplegit.fetch(["-p"]);
@@ -271,18 +282,16 @@ class Gitflow extends Command {
     const dayStr = String(this.date.getDate()).padStart(2, "0");
     const dailyBranchName = `release_${yearStr}${monthStr}${dayStr}`;
     if (await this.isLocalBranchExist(dailyBranchName)) {
-      throw new Error(`已存在本地分支${dailyBranchName},请确认并将其删除后重试`)
+      if (await this.inquirerYesOrNo(`已存在本地分支${dailyBranchName},请确认是否可修改版本号. 如选择否,请将其删除后重试`) === 'yes') {
+        await this.syncVersionToPackageJson();
+        await this.autoCommitAndPushVersionCode()
+        throw new Error('已完成并退出')
+      } else {
+        throw new Error('已退出')
+      }
     }
     if (remoteNameList.includes(`origin/${dailyBranchName}`)) {
-      const { isModifyVersion } = await inquirer.prompt({
-        type: "list",
-        message: `已存在远程分支 origin/${dailyBranchName},是否继续更改version`,
-        defaultValue: "no",
-        name: "isModifyVersion",
-        choices: [{ name: "是", value: "yes" },
-        { name: "否", value: "no" }]
-      });
-      if (isModifyVersion === 'yes') {
+      if (await this.inquirerYesOrNo(`已存在远程分支 origin/${dailyBranchName},是否继续更改version`) === 'yes') {
         await this.checkoutBranch(dailyBranchName)
       } else {
         throw new Error('已退出')
