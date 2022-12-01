@@ -6,7 +6,7 @@ const Package = require("@fie-cli/package");
 const SETTINGS = {
   init: "@fie-cli/init",
   publish: "@fie-cli/publish",
-  gitFlow: "@fie-cli/gitFlow"
+  gitFlow: "@fie-cli/gitflow"
 
 };
 const CACHE_DIRECTORY = "dependencies";
@@ -31,11 +31,10 @@ async function basicExec() {
       packageName,
       packageVersion,
     });
-
     if (await initPkg.exists()) {
       //更新package
-
-      await initPkg.update();
+      nlog.info(`${packageName}可更新${packageVersion}`)
+      // await initPkg.update();
     } else {
       //安装package
       await initPkg.install();
@@ -72,7 +71,7 @@ async function basicExec() {
       args[args.length - 1] = obj;
 
       const code = `require("${rootFile}")(${JSON.stringify(args)})`;
-  nlog.verbose(targetPath, homePath,args);
+      nlog.verbose(targetPath, homePath, args);
 
       const child = spawn("node", ["-e", code], {//利用spawn方式开启子进程
         cwd: process.cwd(),
