@@ -24,7 +24,7 @@
   "dependencies": {
     "@fie-cli/exec": "^1.0.1",
     "@fie-cli/get-npm-info": "^1.0.1",
-    "@fie-cli/gitFlow": "file:../../commands/gitFlow",
+    "@fie-cli/gitFlow": "^1.0.1",
     "@fie-cli/init": "^1.0.1",
     "@fie-cli/nlog": "^1.0.1",
     "@fie-cli/publish": "^1.0.1",
