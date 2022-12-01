@@ -1,6 +1,6 @@
 {
   "name": "@fie-cli/exec",
-  "version": "1.0.1-alpha.0",
+  "version": "1.0.1",
   "description": " fie-cli/exec",
   "author": "xiaowei zhou <19337129021@163.com>",
   "homepage": "https://github.com/Deviltear/fie-cli#readme",
@@ -27,8 +27,8 @@
     "url": "https://github.com/Deviltear/fie-cli/issues"
   },
   "dependencies": {
-    "@fie-cli/nlog": "^1.0.1-alpha.0",
-    "@fie-cli/package": "^1.0.1-alpha.0"
+    "@fie-cli/nlog": "^1.0.1",
+    "@fie-cli/package": "^1.0.1"
   },
   "gitHead": "ac8ddb68895040886d3639d2c3644d73bd9a39bd"
 }
