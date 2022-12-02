@@ -77,7 +77,7 @@ class Package {
       this.getSpecifyCacheFilePath(latestPackageVersion);
     fse.mkdirpSync(latestVersionCacheFilePath) //生成存放最新版本的文件夹
     if (fs.existsSync(latestVersionCacheFilePath)) {
-      fse.remove(this.cacheFilePath) //清除已有的旧版本包
+      // fse.remove(this.cacheFilePath) //清除已有的旧版本包
       await npmInstall({
         root: this.targetPath,
         storeDir: this.storeDir,

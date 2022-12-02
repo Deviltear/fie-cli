@@ -10,7 +10,6 @@ const { Command } = require('commander');
 const pkg = require('../package.json')
 const nlog = require("@fie-cli/nlog")
 const { getNpmLatestSemverVersion } = require("@fie-cli/get-npm-info")
-const { init } = require("@fie-cli/init")
 const { basicExec } = require("@fie-cli/exec")
 const program = new Command();
 const { LOWEST_NODE_VERSION, DEFAULT_CLI_HOME, NPM_NAME } = require("./constant")
@@ -55,7 +54,7 @@ function registerCommander() {
     .command('init [projectName]')
     .description('项目初始化')
     .option('-f --force', '是否强制初始化项目')
-    .action(init)
+    .action(basicExec)
   program
     .command('publish')
     .description('项目发布')

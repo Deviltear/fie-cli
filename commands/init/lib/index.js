@@ -11,7 +11,7 @@ const nlog = require("@fie-cli/nlog");
 const currentProcessPath = process.cwd();
 const TYPE_PROJECT = "project";
 const TYPE_COMPONENT = "componet";
-const getProjectTemplate = require("./getProjectTemplate");
+const { template } = require("./localProjectTemplate");
 const path = require("path");
 const ejs = require("ejs");
 const glob = require("glob");
@@ -21,6 +21,7 @@ class InitCommand extends Command {
   init() {
     this.projectName = this._argv[0] || "";
     this.force = this._cmd?.force;
+    console.log('projectName', this._argv[0]);
   }
   async exec() {
     try {
@@ -30,11 +31,11 @@ class InitCommand extends Command {
     }
   }
   async installTemplate() {
-      this.installNormalTemplate()
+    this.installNormalTemplate()
   }
   async ejsRender(options) {
     const dir = process.cwd()
-   const ejsdata =  this.projectInfo
+    const ejsdata = this.projectInfo
     return new Promise((resolve, reject) => {
       const { ignore } = options || {}
       glob('**', {
@@ -48,11 +49,11 @@ class InitCommand extends Command {
         Promise.all(files.map(file => {
           const filePath = path.join(dir, file)
           return new Promise((resolve1, reject1) => {
-            ejs.renderFile(filePath, ejsdata,{}, (err, result) => {
+            ejs.renderFile(filePath, ejsdata, {}, (err, result) => {
               if (err) {
                 reject1(err)
               } else {
-                fse.writeFileSync(filePath,result)
+                fse.writeFileSync(filePath, result)
                 resolve1(result)
               }
             })
@@ -81,7 +82,37 @@ class InitCommand extends Command {
 
 
     await this.ejsRender({ ignore })
-    const { installCommand, startCommand } = this.templateInfo;
+    const { autoInstall } = await inquirer.prompt([
+      {
+        type: "list",
+        name: "autoInstall",
+        message: "是否自动安装依赖并启动",
+        default: 'yes',
+        choices: [
+          { name: "是", value: 'yes' },
+          { name: "否", value: 'no' },
+
+        ],
+      },
+    ]);
+    if (autoInstall === 'no') {
+      return
+    }
+    const { installCommand } = await inquirer.prompt([
+      {
+        type: "list",
+        name: "installCommand",
+        message: "请选择包管理器",
+        default: 'yes',
+        choices: [
+          { name: "npm", value: 'npm i' },
+          { name: "cnpm", value: 'cnpm i' },
+          { name: "yarn", value: 'yarn install' },
+          { name: "pnpm", value: 'pnpm i' },
+        ],
+      },
+    ]);
+    const { startCommand } = this.templateInfo;
 
     try {
       await this.commandPars(installCommand)
@@ -93,7 +124,7 @@ class InitCommand extends Command {
     } catch (error) {
       throw new Error('项目启动失败,可检查后手动启动')
     }
-    
+
   }
   async commandPars(commandStr) {
     if (commandStr) {
@@ -116,7 +147,7 @@ class InitCommand extends Command {
     }
   }
   async installCustomTemplate() {
-   //todo:待开发自定义模板安装
+    //todo:待开发自定义模板安装
   }
 
   async downLoadTemplate(templateList = []) {
@@ -165,7 +196,7 @@ class InitCommand extends Command {
   }
 
   async prepare() {
-    const template = await getProjectTemplate();
+    // const template = await getProjectTemplate();
     if (!template || !template?.length) {
       //判断模板是否存在,不存在直接可以退出
       throw new Error("项目模板不存在");
@@ -204,7 +235,7 @@ class InitCommand extends Command {
         }
         let spinner = spinnerStart('正在清空目录...')
         await sleep(500)
-        await fse.emptyDir(currentProcessPath); //fixme:目前是删除至回收站,是否有方式删除至回收站
+        await fse.emptyDir(currentProcessPath); //fixme:目前是直接删除,是否有方式删除至回收站
         spinner.stop()
       }
     }
@@ -217,65 +248,50 @@ class InitCommand extends Command {
 
   async getProjectInfo() {
     let projectInfo = {};
-    const { initType } = await inquirer.prompt([
+
+    const project = await inquirer.prompt([
       {
-        type: "list",
-        name: "initType",
-        message: "选择初始化类型",
-        default: TYPE_PROJECT,
-        choices: [
-          { name: "项目", value: TYPE_PROJECT },
-          { name: "组件", value: TYPE_COMPONENT },
-        ],
+        type: "input",
+        name: "projectName",
+        message: "请输入项目名称",
+        default: "",
+        validate: function (v) {
+          const done = this.async();
+          setTimeout(function () {
+            //首字符必须英文字母
+            //尾字符必须为英文字母或数字
+            //字符仅可以是'_或-'
+            //可利用分组写此正则
+            if (
+              !/^[a-zA-Z]+([-][a-zA-Z][a-zA-Z0-9]*|[_][a-zA-Z][a-zA-Z0-9]*|[a-zA-Z0-9])*$/.test(
+                v
+              )
+            ) {
+              return done("请输入合法的项目名称");
+            }
+            done(null, true);
+          }, 0);
+        },
+        filter: (v) => {
+          return v;
+        },
+      },
+      {
+        type: "input",
+        name: "projectVersion",
+        message: "请输入项目版本号",
+        default: "1.0.0",
+        validate: (v) => {
+          return typeof v === "string";
+        },
+        filter: (v) => {
+          return v;
+        },
       },
     ]);
-    if (initType === TYPE_PROJECT) {
-      const project = await inquirer.prompt([
-        {
-          type: "input",
-          name: "projectName",
-          message: "请输入项目名称",
-          default: "",
-          validate: function (v) {
-            const done = this.async();
-            setTimeout(function () {
-              //首字符必须英文字母
-              //尾字符必须为英文字母或数字
-              //字符仅可以是'_或-'
-              //可利用分组写此正则
-              if (
-                !/^[a-zA-Z]+([-][a-zA-Z][a-zA-Z0-9]*|[_][a-zA-Z][a-zA-Z0-9]*|[a-zA-Z0-9])*$/.test(
-                  v
-                )
-              ) {
-                return done("请输入合法的项目名称");
-              }
-              done(null, true);
-            }, 0);
-          },
-          filter: (v) => {
-            return v;
-          },
-        },
-        {
-          type: "input",
-          name: "projectVersion",
-          message: "请输入项目版本号",
-          default: "1.0.0",
-          validate: (v) => {
-            return typeof v === "string";
-          },
-          filter: (v) => {
-            return v;
-          },
-        },
-      ]);
-      projectInfo = {
-        initType,
-        ...project,
-      };
-    } else {
-    }
+    projectInfo = {
+      ...project,
+    };
     return projectInfo;
   }
 }
@@ -295,5 +311,5 @@ function createTemplateChoice(list) {
     name: item.name,
   }));
 }
-module.exports = { init };
+module.exports = init;
 module.exports.InitCommand = InitCommand;
