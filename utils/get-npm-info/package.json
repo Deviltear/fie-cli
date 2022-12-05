@@ -1,6 +1,6 @@
 {
   "name": "@fie-cli/get-npm-info",
-  "version": "1.0.4",
+  "version": "1.0.2",
   "description": "fie-cli/get-npm-info",
   "author": "xiaowei zhou <19337129021@163.com>",
   "homepage": "",
@@ -25,5 +25,5 @@
     "semver": "^7.3.7",
     "url-join": "^3.0.0"
   },
-  "gitHead": "ac8ddb68895040886d3639d2c3644d73bd9a39bd"
+  "gitHead": "7056015faa20f56d124af9300170668ec4f64411"
 }

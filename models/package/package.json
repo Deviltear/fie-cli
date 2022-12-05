@@ -1,6 +1,6 @@
 {
   "name": "@fie-cli/package",
-  "version": "1.0.4",
+  "version": "1.0.2",
   "description": "@fie-cli/package npm块通用类package",
   "author": "xiaowei zhou <19337129021@163.com>",
   "homepage": "https://github.com/Deviltear/fie-cli#readme",
@@ -27,12 +27,12 @@
     "url": "https://github.com/Deviltear/fie-cli/issues"
   },
   "dependencies": {
-    "@fie-cli/get-npm-info": "^1.0.4",
+    "@fie-cli/get-npm-info": "^1.0.2",
     "@fie-cli/system-path-format": "^1.0.1",
     "@fie-cli/util": "^1.0.1",
     "fs-extra": "^10.1.0",
-    "npminstall": "^6.4.0",
-    "pkg-dir": "^4.2.0"
+    "npminstall": "^6.2.0",
+    "pkg-dir": "^2.2.0"
   },
-  "gitHead": "ac8ddb68895040886d3639d2c3644d73bd9a39bd"
+  "gitHead": "7056015faa20f56d124af9300170668ec4f64411"
 }

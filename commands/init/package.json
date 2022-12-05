@@ -1,6 +1,6 @@
 {
   "name": "@fie-cli/init",
-  "version": "1.0.4",
+  "version": "1.0.2",
   "description": "@fie-cli init packge",
   "author": "xiaowei zhou <19337129021@163.com>",
   "homepage": "",
@@ -22,7 +22,7 @@
   "dependencies": {
     "@fie-cli/command": "^1.0.1",
     "@fie-cli/nlog": "^1.0.1",
-    "@fie-cli/package": "^1.0.4",
+    "@fie-cli/package": "^1.0.2",
     "@fie-cli/request": "^1.0.1",
     "@fie-cli/util": "^1.0.1",
     "ejs": "^3.1.8",
@@ -31,5 +31,5 @@
     "inquirer": "8.0.0",
     "user-home": "^3.0.0"
   },
-  "gitHead": "ac8ddb68895040886d3639d2c3644d73bd9a39bd"
+  "gitHead": "7056015faa20f56d124af9300170668ec4f64411"
 }
