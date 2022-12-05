@@ -1,6 +1,6 @@
 {
   "name": "@fie-cli/exec",
-  "version": "1.0.1",
+  "version": "1.0.4",
   "description": " fie-cli/exec",
   "author": "xiaowei zhou <19337129021@163.com>",
   "homepage": "https://github.com/Deviltear/fie-cli#readme",
@@ -28,6 +28,6 @@
   },
   "dependencies": {
     "@fie-cli/nlog": "^1.0.1",
-    "@fie-cli/package": "^1.0.2"
+    "@fie-cli/package": "^1.0.4"
   }
 }
