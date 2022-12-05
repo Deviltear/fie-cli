@@ -28,7 +28,6 @@
   },
   "dependencies": {
     "@fie-cli/nlog": "^1.0.1",
-    "@fie-cli/package": "^1.0.1"
-  },
-  "gitHead": "ac8ddb68895040886d3639d2c3644d73bd9a39bd"
+    "@fie-cli/package": "^1.0.2"
+  }
 }
