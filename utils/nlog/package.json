@@ -1,6 +1,6 @@
 {
   "name": "@fie-cli/nlog",
-  "version": "1.0.1",
+  "version": "1.1.1",
   "description": "基于npmlog封装的统一命令行打印",
   "author": "xiaowei zhou <19337129021@163.com>",
   "homepage": "",
