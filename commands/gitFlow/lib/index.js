@@ -9,22 +9,17 @@ const fse = require("fs-extra");
 const simpleGit = require("simple-git");
 const projectPath = process.cwd();
 const simplegit = simpleGit(projectPath);
-const remoteBranchListObj = {
-  develop: ["develop"],
-  release: ["release"],
-  all: ["develop", "release"],
-};
 const CHOOSE_REMOTE_BRANCH = [
   { name: "develop", value: "develop" },
-  { name: "release", value: "release" },
-  { name: "developAndrelease", value: "all" },
+  { name: "test", value: "test" },
+  { name: "demo", value: "demo" },
 ];
 class Gitflow extends Command {
   init() {
     const { chooseBranch, createRelese } = this._cmd || {};
     this.chooseBranch = chooseBranch;
     this.createRelese = createRelese;
-    this.pushBranch = remoteBranchListObj.all;
+    this.pushBranch = ["develop"];
     this.date = new Date();
   }
 
@@ -48,16 +43,17 @@ class Gitflow extends Command {
     await this.checkOnlyStageNotCommitted(); //check wether there is code in stage
     await this.checkConflicted();
     await this.pushRemoteRepo(this.currentBranch);
-    if (this.chooseBranch) {
+    //此处该为默认问询选择
+    // if (1) {
       const { pushBranch } = await inquirer.prompt({
-        type: "list",
-        message: "选择要合并提交至哪些远程分支",
-        defaultValue: "all",
+        type: "checkbox",
+        message: "选择要合并提交至哪些远程分支,默认为develop",
+        default: ["develop"],
         name: "pushBranch",
         choices: CHOOSE_REMOTE_BRANCH,
       });
-      this.pushBranch = remoteBranchListObj[pushBranch];
-    }
+      this.pushBranch =pushBranch;
+    // }
     for (let branchName of this.pushBranch) {
       await this.checkoutBranch(branchName); // checkout local branch
       await this.pullRemoteRepo(branchName, {
