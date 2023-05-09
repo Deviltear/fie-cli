@@ -9,8 +9,6 @@ const { spinnerStart, sleep, cpSpawnAsync } = require("@fie-cli/util");
 const nlog = require("@fie-cli/nlog");
 //当前进程的执行文件路径
 const currentProcessPath = process.cwd();
-const TYPE_PROJECT = "project";
-const TYPE_COMPONENT = "componet";
 const { template } = require("./localProjectTemplate");
 const path = require("path");
 const ejs = require("ejs");
@@ -105,10 +103,10 @@ class InitCommand extends Command {
         message: "请选择包管理器",
         default: 'yes',
         choices: [
+          { name: "pnpm", value: 'pnpm i' },
+          { name: "yarn", value: 'yarn install' },
           { name: "npm", value: 'npm i' },
           { name: "cnpm", value: 'cnpm i' },
-          { name: "yarn", value: 'yarn install' },
-          { name: "pnpm", value: 'pnpm i' },
         ],
       },
     ]);
@@ -145,9 +143,6 @@ class InitCommand extends Command {
     if (WHITE_COMMAND.includes(cmd)) {
       return cmd
     }
-  }
-  async installCustomTemplate() {
-    //todo:待开发自定义模板安装
   }
 
   async downLoadTemplate(templateList = []) {
