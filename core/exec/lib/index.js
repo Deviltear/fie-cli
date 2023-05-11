@@ -14,8 +14,8 @@ async function basicExec() {
   // process.env._CLI_TARGET_PATH,process.env._CLI_HOME_PATH 是core/cli 里面定义的全局环境变量
   let targetPath = process.env._CLI_TARGET_PATH;
   const homePath = process.env._CLI_HOME_PATH;
+  const updatePackage = process.env._ISUPDATEPACKAGE;
   const cmdObj = arguments[arguments.length - 1];
-
   const packageName = SETTINGS[cmdObj.name()];
   let storePath, rootFile;
   const packageVersion = "latest";
@@ -31,11 +31,11 @@ async function basicExec() {
       packageName,
       packageVersion,
     });
-    if (await initPkg.exists()) {
+    if (await initPkg.exists()&&updatePackage) {
       //更新package
-      nlog.info(`${packageName}可更新${packageVersion}`)
-      // await initPkg.update();
-    } else {
+      nlog.info(`${packageName}正在更新`)
+      await initPkg.update();
+    } else if (!await initPkg.exists()&&!updatePackage) {
       //安装package
       await initPkg.install();
 
@@ -51,7 +51,6 @@ async function basicExec() {
     });
     rootFile = execPkg.getEntryFilePath();
   }
-
   if (rootFile) {
     try {
       const args = Array.from(arguments);

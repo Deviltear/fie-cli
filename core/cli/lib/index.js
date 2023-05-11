@@ -50,6 +50,7 @@ function registerCommander() {
     .version(pkg.version)
     .option('-d, --debug, 是否开启调试模式', false)
     .option('-tp, --targetPath <char>', '是否指定本地调试文件目录', '/')
+    .option('-up, --update', '是否更新命令包', false)
   program
     .command('init [projectName]')
     .description('项目初始化')
@@ -81,6 +82,9 @@ function registerCommander() {
   program.on('option:targetPath', function () {
     process.env._CLI_TARGET_PATH = options.targetPath
   })
+  program.on('option:update', function () {
+    process.env._ISUPDATEPACKAGE = options.update||false
+  })
   //对未知命令进行监听
   program.on('command:*', function (obj) {
     const availableCommands = program.command.map(cwd => cwd.name())
@@ -98,7 +102,7 @@ function registerCommander() {
   }
 }
 function checkCliVersion() {
-  nlog.info(pkg.version);
+  nlog.info('欢迎使用surpath前端脚手架');
 }
 //检查用户权限,并自动降级用户
 function checkRoot() {
