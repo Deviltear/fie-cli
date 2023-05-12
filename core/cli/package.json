@@ -22,7 +22,7 @@
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "dependencies": {
-    "@fie-cli/exec": "file:../../commands/exec",
+    "@fie-cli/exec": "file:../exec",
     "@fie-cli/get-npm-info": "^1.1.1",
     "@fie-cli/gitflow": "file:../../commands/gitFlow",
     "@fie-cli/init": "file:../../commands/init",
