@@ -2,9 +2,7 @@
 const fs = require("fs");
 const fse = require("fs-extra");
 const inquirer = require("inquirer");
-const userHome = require("user-home");
 const Command = require("@fie-cli/command");
-const Package = require("@fie-cli/package");
 const { spinnerStart, sleep, cpSpawnAsync } = require("@fie-cli/util");
 const nlog = require("@fie-cli/nlog");
 //当前进程的执行文件路径
@@ -14,12 +12,13 @@ const path = require("path");
 const ejs = require("ejs");
 const glob = require("glob");
 
+import {simpleGit,CleanOptions} from "simple-git";
+
 const WHITE_COMMAND = ['npm', 'cnpm', 'yarn', 'pnpm']
 class InitCommand extends Command {
   init() {
     this.projectName = this._argv[0] || "";
     this.force = this._cmd?.force;
-    console.log('projectName', this._argv[0]);
   }
   async exec() {
     try {
@@ -65,11 +64,8 @@ class InitCommand extends Command {
     await sleep()
     //拷贝模板代码至当前目录
     try {
-      const cacheTemplatePath = path.resolve(this.templateNpm.cacheFilePath, 'template')
-      fse.ensureDirSync(cacheTemplatePath)
-      fse.ensureDirSync(currentProcessPath)
-
-      fse.copySync(cacheTemplatePath, currentProcessPath)
+    await  simpleGit().clean(CleanOptions.FORCE);
+    await simpleGit().init()
       spinner.succeed('安装模板完成')
     } catch (error) {
       spinner.fail(error)
@@ -110,7 +106,7 @@ class InitCommand extends Command {
         ],
       },
     ]);
-    const { startCommand } = this.templateInfo;
+    const  startCommand = fse.readFile('package.json')?.scripts?.dev ||'npm run dev';
 
     try {
       await this.commandPars(installCommand)
@@ -146,52 +142,32 @@ class InitCommand extends Command {
   }
 
   async downLoadTemplate(templateList = []) {
-    const { templateName } = await inquirer.prompt([{
+    const { gitUrlName } = await inquirer.prompt([{
       choices: createTemplateChoice(templateList),
       message: '请选择项目模板',
-      name: "templateName",
+      name: "gitUrlName",
       type: 'rawlist',
     }]);
-    const choocedTemplateInfo = templateList.find(item => item?.name == templateName)
+    /*
+    模版内容由原先从npm下载模板代码拷贝模板代码至当前目录,改为从git仓库clone代码至当前目录
+    */
+    const choocedTemplateInfo = templateList.find(item => item?.gitUrl == gitUrlName)
     this.templateInfo = choocedTemplateInfo
-    const { npmName, packageVersion } = choocedTemplateInfo
-    const targetPath = path.resolve(userHome, '.fie-cli', 'template')
-    const storePath = path.resolve(userHome, '.fie-cli', 'template', 'node_modules')
-    const templateNpm = new Package({
-      targetPath,
-      storePath,
-      packageName: npmName,
-      packageVersion
-    })
-    this.templateNpm = templateNpm
-    if (!await templateNpm.exists()) {
+
       const spinner = spinnerStart('正在下载模板...')
       await sleep()
       try {
-        await templateNpm.install()
+        await simpleGit().clone(gitUrlName, currentProcessPath)
         nlog.success('下载模板成功')
 
       } catch (e) {
+        throw new Error('克隆模板代码失败')
       } finally {
         spinner.stop()
       }
-
-    } else {
-      const spinner = spinnerStart('正在更新模板...')
-      await sleep()
-      try {
-        await templateNpm.update()
-        nlog.success('更新模板成功')
-
-      } catch (e) {
-      } finally {
-        spinner.stop()
-      }
-    }
   }
 
   async prepare() {
-    // const template = await getProjectTemplate();
     if (!template || !template?.length) {
       //判断模板是否存在,不存在直接可以退出
       throw new Error("项目模板不存在");
@@ -302,7 +278,7 @@ function init(argv) {
 }
 function createTemplateChoice(list) {
   return list.map(item => ({
-    value: item.name,
+    value: item.gitUrl,
     name: item.name,
   }));
 }

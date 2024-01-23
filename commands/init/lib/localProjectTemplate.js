@@ -1,22 +1,21 @@
 
 const tplList = [
   {
-    "id": "62d4cab964959d44674a8d33",
-    "packageVersion": "1.4.0",
-    "npmName": "ora",
-    "name": "mit标准模板",
-    "code": "mit",
+    "id": "1",
+    "enName": "stencil",
+    "name": "中后台模板",
+    "code": "managerStencil",
+    "gitUrl": "http://git.surpath-inc.net/frontend/frontend-basic/surpath-manager-stencil.git",
     "type": "normal"
   },
   {
-  "id": "62d7f04664959d44674a9e15",
-  "packageVersion": "1.0.5",
-  "npmName": "fie-cli-template-umi4",
-  "name": "umi4标准模板",
-  "code": "umi4Normal",
-  "type": "normal",
-  "startCommand": "npm run dev"
-},
+    "id": "2",
+    "enName": "ssrWebsite",
+    "value": "ssrWebsite",
+    "name": "SSR官网模板",
+    "code": "ssr-website",
+    "type": "normal"
+  },
 ]
 
 module.exports = { template: tplList }

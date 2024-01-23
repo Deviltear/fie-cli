@@ -7,7 +7,7 @@ function isObject(t) {
     return Object.prototype.toString.call(t) === '[object Object]'
 }
 function getDefaultregistry(isOriginal = false) {
-    return isOriginal ? 'https://registry.npmjs.org' : 'https://registry.npm.taobao.org'
+    return isOriginal ? 'http://mvn.surpath-inc.net/repository/snpm/':'https://registry.npmjs.org'
 }
 
 function spinnerStart(startString = "Loading", startText) {

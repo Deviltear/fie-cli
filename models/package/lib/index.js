@@ -62,12 +62,12 @@ class Package {
   }
   //安装package
   async install() {
-    await npmInstall({
-      root: this.targetPath,
-      storeDir: this.storeDir,
-      registry: getDefaultregistry(),
-      pkgs: [{ name: this.packageName, version: this.packageVersion }],
-    });
+    // await npmInstall({
+    //   root: this.targetPath,
+    //   storeDir: this.storeDir,
+    //   registry: getDefaultregistry(),
+    //   pkgs: [{ name: this.packageName, version: this.packageVersion }],
+    // });
   }
   //更新package
   async update() {

@@ -7,6 +7,7 @@ const Command = require("@fie-cli/command");
 const semver = require("semver");
 const fse = require("fs-extra");
 const simpleGit = require("simple-git");
+const { log } = require("console");
 const projectPath = process.cwd();
 const simplegit = simpleGit(projectPath);
 const CHOOSE_REMOTE_BRANCH = [
@@ -199,42 +200,22 @@ class Gitflow extends Command {
   }
   async syncVersionToPackageJson() {
     try {
-      const pkg = fse.readJsonSync(`${projectPath}/version.json`);
-      const releaseVersion = pkg.version;
-      const { incType } = await inquirer.prompt({
-        type: "list",
-        choices: [
-          {
-            name: `小版本（${releaseVersion} -> ${semver.inc(
-              releaseVersion,
-              "patch",
-            )}）`,
-            value: "patch",
-          },
-          {
-            name: `中版本（${releaseVersion} -> ${semver.inc(
-              releaseVersion,
-              "minor",
-            )}）`,
-            value: "minor",
-          },
-          {
-            name: `大版本（${releaseVersion} -> ${semver.inc(
-              releaseVersion,
-              "major",
-            )}）`,
-            value: "major",
-          },
-        ],
-        defaultValue: "patch",
-        message: "自动升级版本，请选择升级版本类型",
-        name: "incType",
-      });
+      const pkg = fse.readJsonSync(`${projectPath}/package.json`);
+      let incVersion = pkg.version;
+      if (incVersion) {
+        const lastStringList = incVersion.split('.');
+        if (lastStringList[2] >= 100) {
+          incVersion= semver.inc(incVersion, 'minor');
+        }
+        if (lastStringList[1] >= 99) {
+          incVersion= semver.inc(incVersion, 'major');
+        }
+        incVersion= semver.inc(incVersion, 'patch');
+      }
       if (pkg && pkg.version !== this.version) {
-        const incVersion = semver.inc(releaseVersion, incType);
         pkg.version = incVersion;
 
-        fse.writeJsonSync(`${projectPath}/version.json`, pkg, { spaces: 2 });
+        fse.writeJsonSync(`${projectPath}/package.json`, pkg, { spaces: 2 });
       }
       nlog.success(`已将版本号修改为${pkg.version}`)
     } catch (error) {
@@ -243,13 +224,14 @@ class Gitflow extends Command {
   }
   async autoCommitAndPushVersionCode() {
     const status = await simplegit.status();
-    const modifiedList = status?.modified?.filter(v => v !== 'version.json');
+    const modifiedList = status?.modified?.filter(v => v !== 'package.json');
 
     if (modifiedList.length) {
       return nlog.error('存在版本号文件之外的修改,请检查手动提交')
     }
     await simplegit.add('./*')
       .commit('update version.json')
+    await this.pullRemoteRepo(this.currentBranch)
     await this.checkConflicted()
     await this.pushRemoteRepo(this.currentBranch)
     nlog.success(`已成功创建发版分支${this.currentBranch} ,并修改版本号推送至远程`)

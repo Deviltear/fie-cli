@@ -6,7 +6,7 @@
   "homepage": "",
   "license": "ISC",
   "bin": {
-    "fie": "bin/index.js"
+    "fie-test": "bin/index.js"
   },
   "directories": {
     "main": "bin",
