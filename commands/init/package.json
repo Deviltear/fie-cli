@@ -1,6 +1,6 @@
 {
   "name": "@fie-cli/init",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "@fie-cli init packge",
   "author": "xiaowei zhou <19337129021@163.com>",
   "homepage": "",
@@ -23,7 +23,7 @@
     "@fie-cli/command": "^1.1.1",
     "@fie-cli/nlog": "^1.1.1",
     "@fie-cli/request": "^1.1.1",
-    "@fie-cli/util": "^1.1.1",
+    "@fie-cli/util": "^1.2.0",
     "ejs": "^3.1.8",
     "fs-extra": "^10.1.0",
     "glob": "^8.0.3",

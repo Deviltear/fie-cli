@@ -1,6 +1,6 @@
 {
   "name": "@fie-cli/gitflow",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "自动化git流程",
   "author": "xiaowei zhou <19337129021@163.com>",
   "homepage": "https://github.com/Deviltear/fie-cli#readme",

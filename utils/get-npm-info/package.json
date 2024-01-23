@@ -1,6 +1,6 @@
 {
   "name": "@fie-cli/get-npm-info",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "fie-cli/get-npm-info",
   "author": "xiaowei zhou <19337129021@163.com>",
   "homepage": "",
@@ -20,7 +20,7 @@
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "dependencies": {
-    "@fie-cli/util": "^1.1.1",
+    "@fie-cli/util": "^1.2.0",
     "axios": "^0.27.2",
     "semver": "^7.3.7",
     "url-join": "^3.0.0"
