@@ -177,6 +177,12 @@ class Gitflow extends Command {
     nlog.success(`合并${this.currentBranch}代码至 ${branchName} 分支`);
   }
   async pullRemoteRepo(branchName, options = {}) {
+    const remoteList = await simplegit.branch(["--list", "--remote"]);
+    const remoteNameList = remoteList.all;
+    if (!remoteNameList.includes(`origin/${branchName}`)) {
+      nlog.error(`远程不存在 ${branchName} 分支`);
+      process.exit(0);
+    }
     await simplegit.pull("origin", branchName, options).catch((err) => {
       if (err.message.indexOf("Permission denied (publickey)") >= 0) {
         throw new Error(`请获取本地 ssh publickey 并配置到`);
@@ -222,7 +228,7 @@ class Gitflow extends Command {
       nlog.error(error)
     }
   }
-  async autoCommitAndPushVersionCode() {
+  async autoCommitAndPushVersionCode(isExitOrign = false) {
     const status = await simplegit.status();
     const modifiedList = status?.modified?.filter(v => v !== 'package.json');
 
@@ -231,7 +237,9 @@ class Gitflow extends Command {
     }
     await simplegit.add('./*')
       .commit('update version.json')
-    await this.pullRemoteRepo(this.currentBranch)
+      if (isExitOrign) {
+         await this.pullRemoteRepo(this.currentBranch)
+      }
     await this.checkConflicted()
     await this.pushRemoteRepo(this.currentBranch)
     nlog.success(`已成功创建发版分支${this.currentBranch} ,并修改版本号推送至远程`)
@@ -259,20 +267,22 @@ class Gitflow extends Command {
     const monthStr = String(this.date.getMonth() + 1).padStart(2, "0");
     const dayStr = String(this.date.getDate()).padStart(2, "0");
     const dailyBranchName = `release_${yearStr}${monthStr}${dayStr}`;
+    this.currentBranch = dailyBranchName;
     if (await this.isLocalBranchExist(dailyBranchName)) {
       if (await this.inquirerYesOrNo(`已存在本地分支${dailyBranchName},请确认是否可修改版本号. 如选择否,请将其删除后重试`) === 'yes') {
         await this.syncVersionToPackageJson();
-        await this.autoCommitAndPushVersionCode()
-        throw new Error('已完成并退出')
+        await this.autoCommitAndPushVersionCode(remoteNameList.includes(`origin/${dailyBranchName}`))
       } else {
-        throw new Error('已退出')
+        nlog.info('已退出')
+        process.exit(0)
       }
     }
     if (remoteNameList.includes(`origin/${dailyBranchName}`)) {
       if (await this.inquirerYesOrNo(`已存在远程分支 origin/${dailyBranchName},是否继续更改version`) === 'yes') {
         await this.checkoutBranch(dailyBranchName)
       } else {
-        throw new Error('已退出')
+        nlog.info('已退出')
+        process.exit(0)
       }
     } else {
       await simplegit.checkoutBranch(dailyBranchName, `origin/master`);

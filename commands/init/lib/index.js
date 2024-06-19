@@ -12,7 +12,7 @@ const path = require("path");
 const ejs = require("ejs");
 const glob = require("glob");
 
-import {simpleGit,CleanOptions} from "simple-git";
+const { simpleGit, CleanOptions } = require('simple-git');
 
 const WHITE_COMMAND = ['npm', 'cnpm', 'yarn', 'pnpm']
 class InitCommand extends Command {
